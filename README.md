@@ -1,4 +1,4 @@
-# goldstar-trading-bot
+# goldstar-crypto-trading-bot
 GoldStar Crypto Trading Bot which can trade based on signals from for example TradeView or any other platform. Buy and Sell actions can be connected as webhooks. You can run as many bots as you like as long as the 'id' differs per bot. All data is stored in CSV files in the data/ folder, containing trades, orders, runtime and other logs. 
 
 GoldStar will automatically buy a small amount of the base currency to pay for the Binance fees. Please remember to set quantity high enough on BUY orders to prevent minimum order errors on Binance (total order value needs to be > 10 BUSD). For example if the price of MATIC is 1.80 BUSD, you need to the quantity to at least (10 / 1.8) 5.6, but please set it higher in case MATIC drops. As rule of thumb set it double the minimum order value (20 BUSD).
