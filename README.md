@@ -16,14 +16,15 @@ Please use the URLs above in TradingView and set them up as webhooks.
 
 **Querystring parameters**
 
-id       = id of the bot, multiple instances can be run
-action   = BUY or SELL, for SELL no quantity is required
-pair     = Crypto pair to be used
-quantity = How much to BUY in MATIC
-key      = Add a unique key to URL to prevent unwanted execution
-trade    = LIVE or PAPER, defaults to PAPER
-spread   = Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
-markup   = Minimum profit. Defaults to setting in config.php
+- id       = id of the bot, multiple instances can be run
+- action   = BUY or SELL, for SELL no quantity is required
+- pair     = Crypto pair to be used
+- quantity = How much to BUY in MATIC
+- key      = Add a unique key to URL to prevent unwanted execution
+- trade    = LIVE or PAPER, defaults to PAPER
+- spread   = Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
+- markup   = Minimum profit. Defaults to setting in config.php
+
 
 **How to install**
 
@@ -33,19 +34,21 @@ markup   = Minimum profit. Defaults to setting in config.php
 
 **Logfiles**
 
-$log_trades    - Contains bag of trades
-$log_history   - History of all trades
-$log_runs      - Runtime log of executions
-$log_settings	 - Settings of the coin
-$log_binance   - Log of all Binance responses
-$log_errors    - Log of all errors
+- $log_trades    - Contains bag of trades
+- $log_history   - History of all trades
+- $log_runs      - Runtime log of executions
+- $log_settings	 - Settings of the coin
+- $log_binance   - Log of all Binance responses
+- $log_errors    - Log of all errors
 
 **Format $log_trades**
 
 2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000
+
 Date, Pair, BUY / SELL, Base, Quote
 
 **Format of $log_history**
 
 2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322
+
 Date, Pair, BUY / SELL, Base, Quote, Profit
