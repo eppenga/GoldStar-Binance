@@ -10,9 +10,11 @@ BUY: http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&quantity=1
 SELL: http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345
 
 **Webhooks**
+
 Please use the URLs above in TradingView and set them up as webhooks.
 
 **Querystring parameters**
+
 id       = id of the bot, multiple instances can be run
 action   = BUY or SELL, for SELL no quantity is required
 pair     = Crypto pair to be used
@@ -23,11 +25,13 @@ spread   = Minimum spread between historical BUY orders. Setting $spread to zero
 markup   = Minimum profit. Defaults to setting in config.php
 
 **How to install**
+
 1) Install 'PHP Binance API from JaggedSoft', please see: https://github.com/jaggedsoft/php-binance-api
 2) Install 'GoldStar Trading Bot' (this application)
 3) Copy config.example.php to config.php and modify
 
 **Logfiles**
+
 $log_trades    - Contains bag of trades
 $log_history   - History of all trades
 $log_runs      - Runtime log of executions
@@ -36,9 +40,11 @@ $log_binance   - Log of all Binance responses
 $log_errors    - Log of all errors
 
 **Format $log_trades**
+
 2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000
 Date, Pair, BUY / SELL, Base, Quote
 
 **Format of $log_history**
+
 2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322
 Date, Pair, BUY / SELL, Base, Quote, Profit
