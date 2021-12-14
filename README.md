@@ -6,6 +6,7 @@ The application uses PHP Binance API from JaggedSoft to place the actual orders.
 GoldStar will automatically buy a small amount of the base currency to pay for the Binance fees. Please remember to set quantity high enough on BUY orders to prevent minimum error size on Binance (ordervalue > 10 BUSD).
 
 **Usage**
+
 BUY: http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&quantity=10&spread=0.5&markup=0.7&trade=LIVE&key=12345
 SELL: http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345
 
