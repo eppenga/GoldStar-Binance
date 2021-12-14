@@ -7,8 +7,8 @@ GoldStar will automatically buy a small amount of the base currency to pay for t
 
 **Usage**
 
-BUY: http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&quantity=10&spread=0.5&markup=0.7&trade=LIVE&key=12345
-SELL: http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345
+'BUY: http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&quantity=10&spread=0.5&markup=0.7&trade=LIVE&key=12345
+'SELL: http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345
 
 **Webhooks**
 
@@ -43,12 +43,10 @@ Please use the URLs above in TradingView and set them up as webhooks.
 
 **Format $log_trades**
 
-2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000
-
-Date, Pair, BUY / SELL, Base, Quote
+'2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000
+'Date, Pair, BUY / SELL, Base, Quote
 
 **Format of $log_history**
 
-2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322
-
-Date, Pair, BUY / SELL, Base, Quote, Profit
+'2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322
+'Date, Pair, BUY / SELL, Base, Quote, Profit
