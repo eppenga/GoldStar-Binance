@@ -5,6 +5,12 @@ GoldStar will automatically buy a small amount of the base currency to pay for t
 
 The application uses PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder to be able to run.
 
+**How to install**
+
+1) Install 'PHP Binance API from JaggedSoft', please see: https://github.com/jaggedsoft/php-binance-api
+2) Install 'GoldStar Trading Bot' (this application)
+3) Copy config.example.php to config.php and modify
+
 **Usage**
 
 BUY:
@@ -13,9 +19,11 @@ BUY:
 SELL:
 `http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345`
 
+*You do not need to set a quantity because it will automatically match the BUY order.*
+
 **Webhooks**
 
-Please use the URLs above in TradingView and set them up as webhooks.
+Please use the URLs above in TradingView and set them up as webhooks. If you do not know what webhooks are, please forget about this application :)
 
 **Querystring parameters**
 
@@ -27,13 +35,6 @@ Please use the URLs above in TradingView and set them up as webhooks.
 - trade    = LIVE or PAPER, defaults to PAPER
 - spread   = Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
 - markup   = Minimum profit. Defaults to setting in config.php
-
-
-**How to install**
-
-1) Install 'PHP Binance API from JaggedSoft', please see: https://github.com/jaggedsoft/php-binance-api
-2) Install 'GoldStar Trading Bot' (this application)
-3) Copy config.example.php to config.php and modify
 
 **Logfiles**
 
