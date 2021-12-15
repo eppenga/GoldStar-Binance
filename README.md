@@ -23,7 +23,11 @@ SELL:
 
 **Webhooks**
 
-Please use the URLs above in TradingView and set them up as webhooks. If you do not know what webhooks are, please forget about this application :)
+Please use the URLs above in TradingView (or any other platform) and set them up as webhooks. If you do not know what webhooks are, please forget about this application :) More information on these webhooks can be found here: https://www.google.com/search?q=tradingview+webhook
+
+**Signals**
+
+You choose your own signals. Based on that the bot will either BUY and SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a 1 minute timescale. Please here https://discord.me/marketliberator
 
 **Querystring parameters**
 
