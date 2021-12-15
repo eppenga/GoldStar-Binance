@@ -53,10 +53,10 @@ You choose your own signals. Based on that the bot will either BUY and SELL. My 
 
 `2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000`
 
-Date, Pair, BUY / SELL, Base, Quote
+Date, Pair, BUY / SELL, Base, Quote. In this file all open orders are stored, this is your bag of unsold orders.
 
 **Format of $log_history**
 
 `2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,LIVE`
 
-Date, Pair, BUY / SELL, Base, Quote, Profit, LIVE / PAPER
+Date, Pair, BUY / SELL, Base, Quote, Profit, LIVE / PAPER. The total of the pair containing all actual BUY and SELLs. You can also use $log_all for a complete overview of all pairs for analysis.
