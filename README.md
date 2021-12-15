@@ -3,7 +3,7 @@ GoldStar Crypto Trading Bot which can trade based on signals from for example Tr
 
 GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
-The application uses PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder to be able to run.
+The application uses PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder to be able to run. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world!
 
 **How to install**
 
