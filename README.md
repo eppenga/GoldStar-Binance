@@ -31,23 +31,23 @@ You choose your own signals. Based on that the bot will either BUY and SELL. My 
 
 **Querystring parameters**
 
-- id       = id of the bot, multiple instances can be run
-- action   = BUY or SELL, for SELL no quantity is required
-- pair     = Crypto pair to be used
-- quantity = How much to BUY in MATIC
-- key      = Add a unique key to URL to prevent unwanted execution
-- trade    = LIVE or PAPER, defaults to PAPER
-- spread   = Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
-- markup   = Minimum profit. Defaults to setting in config.php
+- id       - id of the bot, multiple instances can be run
+- action   - BUY or SELL, for SELL no quantity is required
+- pair     - Crypto pair to be used
+- key      - Add a unique key to URL to prevent unwanted execution
+- trade    - LIVE or PAPER, defaults to PAPER
+- spread   - Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
+- markup   - Minimum profit. Defaults to setting in config.php
 
 **Logfiles**
 
-- $log_trades    - Contains bag of trades
-- $log_history   - History of all trades
-- $log_runs      - Runtime log of executions
-- $log_settings	 - Settings of the coin
-- $log_binance   - Log of all Binance responses
-- $log_errors    - Log of all errors
+- $log_all       - History of all trades totally
+- $log_trades    - Contains bag of trades per coin
+- $log_history   - History of all trades per coin
+- $log_runs      - Runtime log of executions per coin
+- $log_settings	 - Settings per coin
+- $log_binance   - Log of all Binance responses per coin
+- $log_errors    - Log of all errors per coin
 
 **Format $log_trades**
 
