@@ -57,6 +57,6 @@ Date, Pair, BUY / SELL, Base, Quote
 
 **Format of $log_history**
 
-`2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322`
+`2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,LIVE`
 
-Date, Pair, BUY / SELL, Base, Quote, Profit
+Date, Pair, BUY / SELL, Base, Quote, Profit, Live or Paper trade
