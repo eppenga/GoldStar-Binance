@@ -36,7 +36,7 @@ You choose your own signals. Based on that the bot will either BUY and SELL. My 
 - pair     - Crypto pair to be used
 - key      - Add a unique key to URL to prevent unwanted execution
 - trade    - LIVE or PAPER, defaults to PAPER
-- spread   - Minimum spread between historical BUY orders. Setting $spread to zero disables this function. Defaults to the settings in config.php
+- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the settings in config.php
 - markup   - Minimum profit. Defaults to setting in config.php
 
 **Logfiles**
