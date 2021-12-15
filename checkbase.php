@@ -27,7 +27,7 @@ if (!file_exists($log_settings)) {
   $settings_check = true;
 }
 
-// Determine minNotional, baseAsset, baseAsset, etc..
+// Determine minNotional, baseAsset, quoteAsset, etc..
 if ($settings_check) {
   
   echo "<i>Creating new settings file...</i></br /><br />";
@@ -54,38 +54,20 @@ if ($settings_check) {
   $minimums[$symbols["symbol"]] = $filters;
   }
 
-  $set_coin['symbol']     = $pair;
-  $set_coin['status']     = $minimums[$pair]['status'];
-  $set_coin['baseAsset']  = $minimums[$pair]['baseAsset'];
-  $set_coin['quoteAsset'] = $minimums[$pair]['quoteAsset'];
-  $set_coin['stepSize']   = $minimums[$pair]['stepSize']; 
+  // Create an error of usefull values
+  $set_coin['symbol']      = $pair;
+  $set_coin['status']      = $minimums[$pair]['status'];
+  $set_coin['baseAsset']   = $minimums[$pair]['baseAsset'];
+  $set_coin['quoteAsset']  = $minimums[$pair]['quoteAsset'];
+  $set_coin['minNotional'] = $minimums[$pair]['minNotional'];
+  $set_coin['stepSize']    = $minimums[$pair]['stepSize']; 
 
-  // Get balance of coin
-  $ticker   = $api->prices();
-  $balances = $api->balances($ticker);
-  $balance  = $balances[$set_coin['baseAsset']]['available'];
-  $set_coin['balance'] = $balance;
-
-  // Get price of coin in BUSD
-  $pair_BUSD   = $set_coin['baseAsset'] . 'BUSD';
-  $set_coin['priceBUSD']  = $api->price($pair_BUSD);
-
-  // Get balance of the coin in BUSD
-  $set_coin['balanceBUSD'] = $set_coin['balance'] * $set_coin['priceBUSD'];
-  
-  // Check to see if notional is still below the 10 BUSD threshold
-  //$set_coin['balanceBUSD'] = 2; // DEBUG TEMP!!!! REMOVE!!!
-  $set_coin['minBUY'] = ($binanceMinimum * 1.1) / $set_coin['priceBUSD'];
-  $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
-  $set_coin['minBUYBUSD'] = $binanceMinimum * 1.1;  
-    
-  // Check if we can continue
-  if ($set_coin['status'] <> "TRADING") {
-    $message = date("Y-m-d H:i:s") . ",Error: Pair not trading";
-    echo $message;
-    logCommand($message, "error");
-    exit();
-  }
+  // Write new settings file
+  // Pair, status, baseAsset, quoteAsset, minNotional, stepSize
+  $message  = $set_coin['symbol'] . "," . $set_coin['status'] . ",";
+  $message .= $set_coin['baseAsset'] . "," . $set_coin['quoteAsset'] .","; 
+  $message .= $set_coin['minNotional'] . "," . $set_coin['stepSize'];
+  file_put_contents($log_settings, $message);
 
   // Report
   echo "<b>Settings file</b><br />";
@@ -93,12 +75,24 @@ if ($settings_check) {
   echo "Status         : " . $set_coin['status'] . "<br />";
   echo "baseAsset      : " . $set_coin['baseAsset'] . "<br />";
   echo "quoteAsset     : " . $set_coin['quoteAsset'] . "<br />";
-  echo "Stepsize       : " . $set_coin['stepSize'] . "<br />";
-  echo "Price in BUSD  : " . $set_coin['priceBUSD'] . "<br />";
-  echo "Balance in Base: " . $set_coin['balance'] . "<br />";
-  echo "Balance in BUSD: " . $set_coin['balanceBUSD'] . "<br />";
-  echo "Min BUY in Base: " . $set_coin['minBUY'] . "<br />";
-  echo "Min BUY in BUSD: " . $set_coin['minBUYBUSD'] . "<br /><br />";
+  echo "minNotional    : " . $set_coin['minNotional'] . "<br />";
+  echo "Stepsize       : " . $set_coin['stepSize'] . "<br /><br />";
+
+  // Determine minimum quote to meet Binance minimum order value
+  $set_coin_temp = minimumQuote();
+  $set_coin['priceBUSD']   = $set_coin_temp['priceBUSD'];
+  $set_coin['balance']     = $set_coin_temp['balance'];
+  $set_coin['balanceBUSD'] = $set_coin_temp['balanceBUSD'];
+  $set_coin['minBUY']      = $set_coin_temp['minBUY'];
+  $set_coin['minBUYBUSD']  = $set_coin_temp['minBUYBUSD'];
+   
+  // Check if we can continue
+  if ($set_coin['status'] <> "TRADING") {
+    $message = date("Y-m-d H:i:s") . ",Error: Pair not trading";
+    echo $message;
+    logCommand($message, "error");
+    exit();
+  }
 
   // Check if we need more of coin
   if ($set_coin['balanceBUSD'] < $set_coin['minBUYBUSD']) {
@@ -110,14 +104,7 @@ if ($settings_check) {
     } else {
       echo "<i>Not enough balance to pay fees, skipping because PAPER trading...</i><br /><br />";
     }
-  }
-  
-  // Write new settings file
-  // Pair, status, baseAsset, quoteAsset, stepSize, balance
-  $message  = $set_coin['symbol'] . "," . $set_coin['status'] . ",";
-  $message .= $set_coin['baseAsset'] . "," . $set_coin['quoteAsset'] .","; 
-  $message .= $set_coin['stepSize'] . "," . $set_coin['balance'];
-  file_put_contents($log_settings, $message);
+  } 
   
   echo "<hr /><br />";
 } else {

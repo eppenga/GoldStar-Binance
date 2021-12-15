@@ -9,7 +9,6 @@
  * 
  */
 
-
 // Set error reporting and config check
 error_reporting(E_ALL & ~E_NOTICE);
 if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!"; exit();}
@@ -18,15 +17,18 @@ if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!
 /** User and system variables **/
 // Define application settings in config.php, below is only for expert use!
 
-// Secrets
+// Configuration
 include "config.php";
 if (empty($fee))    {$fee = 0.1;}
 if (empty($markup)) {$markup = 0.5;}
 
-// User
+// Debug
 $debug          = false;    // Debug mode
 $debug_buy      = 3.0;      // Buy price when debug mode is true
 $debug_sell     = 3.2;      // Sell price when debug mode is true
+
+// Binance minimum order value
+$binanceMinimum = 10;
 
 // Filenames
 $id = $_GET["id"]; if (!empty($id)) {$id_temp = $id . "_";}
@@ -55,15 +57,17 @@ $total_profit   = 0;
 $total_quantity = 0;
 $total_sell     = 0;
 $history        = "";
-$history_all    = "";
 $message        = "";
 $order          = "";
 $pair           = "";
 $trades         = "";
 $paper          = true;
 
+/** Functions **/
+include "functions.php";
 
-/** Query string parameters **/
+
+/** Query string **/
 
 // Get and validate key
 $get_url_key = $_GET["key"];
@@ -79,7 +83,7 @@ if (!empty($url_key)) {
 // Get ordertype
 $tradetype = strtoupper($_GET["trade"]);
 if (empty($tradetype)) {
-  $ordertype = "PAPER";
+  $tradetype = "PAPER";
 } elseif (($tradetype <> "LIVE") &&
           ($tradetype <> "PAPER")) {
   $message = date("Y-m-d H:i:s") . ",Error: Trading type incorrect";
@@ -87,8 +91,8 @@ if (empty($tradetype)) {
   logCommand($message, "error");
   exit();            
 }
-if ($tradetype == "PAPER") {$paper = true;}
-if ($tradetype == "LIVE") {$paper  = false;}
+if ($tradetype == "PAPER") {$paper = true;} else {$paper = false;}
+if ($paper) {$tradetype = "PAPER";} else {$tradetype = "LIVE";}
 
 // Get BUY (False) or SELL (True) command 
 $command = strtoupper($_GET["action"]);
@@ -112,15 +116,6 @@ if (empty($pair)) {
   exit();
 }
 
-// Get quantity
-$quantity = $_GET["quantity"];
-if (($quantity == 0) && (!$action)) {
-  $message = date("Y-m-d H:i:s") . ",Error: No quantity given";
-  echo $message;
-  logCommand($message, "error");
-  exit();
-} elseif (empty($quantity)) {$quantity = 0;}
-
 // Override spread
 $temp_spread = $_GET["spread"];
 if ($temp_spread <> "") {
@@ -129,7 +124,7 @@ if ($temp_spread <> "") {
   }  
 }
 
-// Override markup
+// Override profit
 $temp_markup = $_GET["markup"];
 if (($temp_markup > 0) && ($temp_markup < 25)) {
   $markup = $temp_markup;
@@ -141,92 +136,6 @@ require 'vendor/autoload.php';
 $api = new Binance\API($binance_key,$binance_secret);
 
 
-/** Log to files **/
-function logCommand($logcommand, $type) {
-  
-  // Declare some variables as global
-  global $log_trades, $log_history, $log_runs, $log_errors, $log_binance, $log_all;
-
-  if ($type <> "binance") {
-    // Standard log format
-    $message = $logcommand . "\n";
-    $message = str_replace("\n\n", "\n", $message);
-  } else {
-    // Binance log format
-    $message  = "==============================================================================================================\n";
-    $message .= "Timestamp: " . date("Y-m-d H:i:s") . "\n\n";
-    $message .= print_r($logcommand, true);
-    $message .= "==============================================================================================================\n\n";    
-  }
-
-  if ($type == "buy") {
-    // Store in active trade log
-    file_put_contents($log_trades, $message, FILE_APPEND | LOCK_EX);
-  } elseif ($type == "all") {
-    // Store all trades in one file for analysis
-    file_put_contents($log_all, $message, FILE_APPEND | LOCK_EX);
-  } elseif ($type == "history") {
-    // Store in historical log
-    file_put_contents($log_history, $message, FILE_APPEND | LOCK_EX);    
-    } elseif ($type == "run") {
-    // Store in runtime log
-    file_put_contents($log_runs, $message, FILE_APPEND | LOCK_EX);    
-  } elseif ($type == "binance") {
-    // Store in Binance log
-    file_put_contents($log_binance, $message, FILE_APPEND | LOCK_EX);
-  } elseif ($type == "error") {
-    // Store in errors log
-    file_put_contents($log_errors, $message, FILE_APPEND | LOCK_EX);
-  } else {
-    // Store in unknowns also in errors log
-    $message = date("Y-m-d H:i:s") . ",Error: Unknown";
-    file_put_contents($log_errors, $message, FILE_APPEND | LOCK_EX);
-  }
-}
-
-
-/** Extract data from Binance order **/
-function extractBinance($order) {
-  
-  // Calculate commission
-  $commission = 0;
-  foreach ($order['fills'] as $fill) {
-    $commission = $commission + $fill['commission'];
-  }
-  
-  // Correct Base and Quote quantity
-  $base  = $order['executedQty'];
-  $quote = $order['cummulativeQuoteQty'];
-  //if ($order['side'] == "BUY")  {$base  = $base - $commission;}
-  //if ($order['side'] == "SELL") {$quote = $quote - $commission;}
-  
-  // Calculate price
-  $price = $order['cummulativeQuoteQty'] / $order['executedQty']; 
-  
-  $transaction = [
-    'symbol' => $order['symbol'],
-    'order' => $order['orderId'],
-    'time' => $order['transactTime'],
-    'status' => $order['status'],
-    'type' =>  $order['type'],
-    'side' =>  $order['side'],    
-    'price' => $price,
-    'base' => $base,
-    'quote' => $quote,
-    'commission' => $commission
-  ]; 
-  
-  if ($debug) {echo "<br /><br />"; print_r($transaction); echo "<br /><br />";}
-  return $transaction;
-}
-
-/** Round value to the nearest stepSize **/
-function roundStep($value, $stepSize = 0.1) {
-    $precision = strlen(substr(strrchr(rtrim($value,'0'), '.'), 1));
-    return round((($value / $stepSize) | 0) * $stepSize, $precision);
-}
-
-
 /** Check if all files exist and if not create empty files **/
 if (!file_exists("data/"))      {mkdir("data/");}
 if (!file_exists($log_all))     {file_put_contents($log_all, "");}
@@ -235,6 +144,7 @@ if (!file_exists($log_runs))    {file_put_contents($log_runs, "");}
 if (!file_exists($log_history)) {file_put_contents($log_history, "");}
 if (!file_exists($log_binance)) {file_put_contents($log_binance, "");}
 if (!file_exists($log_errors))  {file_put_contents($log_errors, "");}
+
 
 /** START PROGRAM **/
 echo '<!DOCTYPE HTML>
@@ -249,7 +159,6 @@ echo '<!DOCTYPE HTML>
 echo "<pre>";
 echo "<h1>Goldstar Bot</h1>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
-if ($paper) {$live = "PAPER";} else {$live = "LIVE";}
 
 /** Get price of pair **/
 $price = $api->price($pair);
@@ -263,6 +172,9 @@ include "checkbase.php";
 if (!$action) {
   echo "<i>Trying to BUY...</i><br /><br /><hr /><br />";
   if ($debug) {$price = $debug_buy;}
+
+  // Minimum order
+  $quantity   = minimumQuote()['minBUY'];
 
   // Caclulate buy
   $buy        = $quantity * $price;
@@ -327,9 +239,8 @@ if (!$action) {
     $unique_id = uniqid();
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
     logCommand($message, "buy");
-    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . "," . (-1 * $commission);
+    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . "," . (-1 * $commission) . "," . $tradetype;
     logCommand($message, "history");
-    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . "," . (-1 * $commission) . "," . $live;
     logCommand($message, "all");    
   } else {
     echo "<i>Price in range of existing buy order, skipping...</i><br /><br /><hr /><br />";
@@ -419,15 +330,15 @@ if ($action) {
           echo "Order ID   : " . $order['orderId'] . "<br />";
           echo "Time       : " . $order['transactTime'] . "<br />";
           echo "Status     : " . $order['status'] . "<br /><br />";          
-        }
+        } 
 
         // Log to history
-        $history     .= date("Y-m-d H:i:s") . "," . $line[1] . "," . $line[2] . "," . $pair . ",SELL," . $quantity . "," . $sell . "," . $profit . "\n";
-        $history_all .= date("Y-m-d H:i:s") . "," . $line[1] . "," . $line[2] . "," . $pair . ",SELL," . $quantity . "," . $sell . "," . $profit . "," . $live . "\n";
+        echo "<i>Profit, we can sell!</i><br /><br />";
+        $history .= date("Y-m-d H:i:s") . "," . $line[1] . "," . $line[2] . "," . $pair . ",SELL," . $quantity . "," . $sell . "," . $profit . "," . $tradetype . "\n";
       } else {
 
         // Log to trades
-        echo "<i>No profit, not selling!</i><br /><br />";
+        echo "<i>Loss, we can not sell!</i><br /><br />";
         $trades .= $line[0] . "," . $line[1] . "," . $line[2] . "," . $line[3] . "," . $line[4] . "," . $line[5] . "," . $line[6] . "\n";
       }
       echo "<hr /><br />";
@@ -456,7 +367,7 @@ if ($total_orders > 0) {
   // Log to history file
   echo "<i>Updating " . $log_history . " file...</i><br />";
   LogCommand($history, "history");
-  LogCommand($history_all, "all");
+  LogCommand($history, "all");
 }
 
 // Log to runtime file
