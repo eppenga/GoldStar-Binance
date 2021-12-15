@@ -16,12 +16,12 @@ The application uses PHP Binance API from JaggedSoft to place the actual orders.
 **Usage**
 
 BUY:
-`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345`
+`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
 
 SELL:
 `http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345`
 
-*You do not need to set a quantity because it will automatically match the BUY order.*
+*The parameters markup, spread(both take default from config.php), trade (defaults to PAPER) and key are optional, it is recommended to use a key!*
 
 **Webhooks**
 
@@ -29,7 +29,7 @@ Please use the URLs above in TradingView (or any other platform) and set them up
 
 **Signals**
 
-You choose your own signals. Based on that the bot will either BUY and SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a 1 minute timescale. They have an awesome Discord Channel here: https://discord.me/marketliberator
+You choose your own signals. Based on that the bot will either BUY and SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a one minute timescale. They have an awesome Discord Channel here: https://discord.me/marketliberator
 
 **Querystring parameters**
 
