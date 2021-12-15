@@ -3,6 +3,8 @@ GoldStar Crypto Trading Bot which can trade based on signals from for example Tr
 
 GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
+It is possible to trade both in PAPER and LIVE money. When you first start, please use PAPER money to get a feeling for the bot. When using PAPER the bot uses the commission setting from the configuration file, when using real money it derives it from Binance. Please be aware that there will always be a diference between paper and real money because of slippage and other reasons.
+
 The application uses PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder to be able to run. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world!
 
 **How to install**
@@ -31,13 +33,13 @@ You choose your own signals. Based on that the bot will either BUY and SELL. My 
 
 **Querystring parameters**
 
-- id       - id of the bot, multiple instances can be run
-- action   - BUY or SELL, for SELL no quantity is required
-- pair     - Crypto pair to be used
-- key      - Add a unique key to URL to prevent unwanted execution
-- trade    - LIVE or PAPER, defaults to PAPER
-- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the settings in config.php
-- markup   - Minimum profit. Defaults to setting in config.php
+- id       - id of the bot, multiple instances can be run (required)
+- action   - BUY or SELL, for SELL no quantity is required (required)
+- pair     - Crypto pair to be used (required)
+- key      - Add a unique key to URL to prevent unwanted execution (optional)
+- trade    - LIVE or PAPER, defaults to PAPER (optional)
+- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the settings in config.php (optional)
+- markup   - Minimum profit. Defaults to setting in config.php (optional)
 
 **Logfiles**
 
