@@ -27,7 +27,7 @@ Please use the URLs above in TradingView (or any other platform) and set them up
 
 **Signals**
 
-You choose your own signals. Based on that the bot will either BUY and SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a 1 minute timescale. Please here https://discord.me/marketliberator
+You choose your own signals. Based on that the bot will either BUY and SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a 1 minute timescale. They have an awesome Discord Channel here: https://discord.me/marketliberator
 
 **Querystring parameters**
 
