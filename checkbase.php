@@ -13,11 +13,6 @@
  * 
  */
 
-// Binance minimum order value
-$binanceMinimum = 10;
-
-// Run every 24 hours
-$repeatrun = 24 * 60 * 60;
 
 // Check if settings are less than 24h old or exist
 $settings_check = false;
@@ -54,7 +49,7 @@ if ($settings_check) {
   $minimums[$symbols["symbol"]] = $filters;
   }
 
-  // Create an error of usefull values
+  // Create an array of usefull values
   $set_coin['symbol']      = $pair;
   $set_coin['status']      = $minimums[$pair]['status'];
   $set_coin['baseAsset']   = $minimums[$pair]['baseAsset'];
@@ -62,8 +57,7 @@ if ($settings_check) {
   $set_coin['minNotional'] = $minimums[$pair]['minNotional'];
   $set_coin['stepSize']    = $minimums[$pair]['stepSize']; 
 
-  // Write new settings file
-  // Pair, status, baseAsset, quoteAsset, minNotional, stepSize
+  // Write new settings file: pair, status, baseAsset, quoteAsset, minNotional, stepSize
   $message  = $set_coin['symbol'] . "," . $set_coin['status'] . ",";
   $message .= $set_coin['baseAsset'] . "," . $set_coin['quoteAsset'] .","; 
   $message .= $set_coin['minNotional'] . "," . $set_coin['stepSize'];
@@ -78,13 +72,13 @@ if ($settings_check) {
   echo "minNotional    : " . $set_coin['minNotional'] . "<br />";
   echo "Stepsize       : " . $set_coin['stepSize'] . "<br /><br />";
 
-  // Determine minimum quote to meet Binance minimum order value
+  // Determine minimum quote quantity to meet Binance minimum order value
   $set_coin_temp = minimumQuote();
-  $set_coin['priceBUSD']   = $set_coin_temp['priceBUSD'];
-  $set_coin['balance']     = $set_coin_temp['balance'];
-  $set_coin['balanceBUSD'] = $set_coin_temp['balanceBUSD'];
-  $set_coin['minBUY']      = $set_coin_temp['minBUY'];
-  $set_coin['minBUYBUSD']  = $set_coin_temp['minBUYBUSD'];
+  $set_coin['priceBUSD']   = $set_coin_temp['priceBUSD'];             // Price of base in BUSD
+  $set_coin['balance']     = $set_coin_temp['balance'];               // Balance in base
+  $set_coin['balanceBUSD'] = $set_coin_temp['balanceBUSD'];           // Balance in BUSD
+  $set_coin['minBUY']      = $set_coin_temp['minBUY'];                // Minimum BUY order in base
+  $set_coin['minBUYBUSD']  = $set_coin_temp['minBUYBUSD'];            // Minimum BUY order in BUSD
    
   // Check if we can continue
   if ($set_coin['status'] <> "TRADING") {

@@ -1,0 +1,18 @@
+# Ignore hidden folders
+/.archive
+/.backup
+
+# Ignore application files
+*2.php
+*3.php
+config.php
+tests.php
+todo.txt
+report.php
+/data
+
+# Ignore jaggedsoft/php-binance-api
+/vendor
+ca.pem
+composer.json
+composer.lock

@@ -99,12 +99,21 @@ function minimumQuote() {
   global $api, $binanceMinimum, $log_settings;
 
   // Get settings
-  $settings = explode(",", file_get_contents($log_settings));
+  if (file_exists($log_settings)) {
+    $settings = explode(",", file_get_contents($log_settings));    
+  } else {
+    $message = date("Y-m-d H:i:s") . ",Error: No settings file was created automatically!";
+    echo $message;
+    logCommand($message, "error");
+    exit();
+  }
   
+  $set_coin['symbol']      = $settings[0];
+  $set_coin['status']      = $settings[1];
   $set_coin['baseAsset']   = $settings[2];
   $set_coin['quoteAsset']  = $settings[3];
   $set_coin['minNotional'] = $settings[4];
-  $set_coin['stepSize']    = $settings[5];      
+  $set_coin['stepSize']    = $settings[5];
 
   // Get balance of coin
   $ticker   = $api->prices();
@@ -135,6 +144,12 @@ function minimumQuote() {
   }
   
   // Return enough data
+  $minQuote['symbol']      = $set_coin['symbol'];
+  $minQuote['status']      = $set_coin['status'];
+  $minQuote['baseAsset']   = $set_coin['baseAsset'];
+  $minQuote['quoteAsset']  = $set_coin['quoteAsset'];
+  $minQuote['minNotional'] = $set_coin['minNotional'];
+  $minQuote['stepSize']    = $set_coin['stepSize'];
   $minQuote['balance']     = $set_coin['balance'];
   $minQuote['balanceBUSD'] = $set_coin['balanceBUSD'];
   $minQuote['minBUY']      = $set_coin['minBUY']; 

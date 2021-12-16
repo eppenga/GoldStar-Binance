@@ -30,6 +30,9 @@ $debug_sell     = 3.2;      // Sell price when debug mode is true
 // Binance minimum order value
 $binanceMinimum = 10;
 
+// Recalculate pair setting every x seconds
+$repeatrun = 24 * 60 * 60;
+
 // Filenames
 $id = $_GET["id"]; if (!empty($id)) {$id_temp = $id . "_";}
 $log_all        = "data/log_history.csv";
@@ -126,7 +129,7 @@ if ($temp_spread <> "") {
 
 // Override profit
 $temp_markup = $_GET["markup"];
-if (($temp_markup > 0) && ($temp_markup < 25)) {
+if (($temp_markup >= 0) && ($temp_markup < 25)) {
   $markup = $temp_markup;
 }
 
@@ -164,7 +167,7 @@ if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br 
 $price = $api->price($pair);
 
 
-/** Check if we have enough to pay fees **/
+/** Check if we have enough to pay fees and get important variables **/
 include "checkbase.php";
 
 
@@ -296,8 +299,8 @@ if ($action) {
         // We can SELL with profit!!
 
         // Do some calculations for now and later
-        $total_profit   = $total_profit + $profit;
         $total_orders   = $total_orders + 1;
+        $total_profit   = $total_profit + $profit;
         $total_quantity = $total_quantity + $quantity;
         $total_sell     = $total_sell + $sell;
         $total_fees     = $total_fees + $fees;
@@ -338,7 +341,7 @@ if ($action) {
       } else {
 
         // Log to trades
-        echo "<i>Loss, we can not sell!</i><br /><br />";
+        echo "<i>Insufficient profit, we can not sell!</i><br /><br />";
         $trades .= $line[0] . "," . $line[1] . "," . $line[2] . "," . $line[3] . "," . $line[4] . "," . $line[5] . "," . $line[6] . "\n";
       }
       echo "<hr /><br />";
