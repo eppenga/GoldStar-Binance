@@ -129,8 +129,10 @@ if ($temp_spread <> "") {
 
 // Override profit
 $temp_markup = $_GET["markup"];
-if (($temp_markup >= 0) && ($temp_markup < 25)) {
-  $markup = $temp_markup;
+if ($temp_markup <> "") {
+  if (($temp_markup >= 0) && ($temp_markup < 25)) {
+    $markup = $temp_markup;
+  }  
 }
 
 

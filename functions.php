@@ -12,6 +12,7 @@
  * 
  */
 
+
 /** Log to files **/
 function logCommand($logcommand, $type) {
   
@@ -155,8 +156,7 @@ function minimumQuote() {
   $minQuote['minBUY']      = $set_coin['minBUY']; 
   $minQuote['minBUYBUSD']  = $set_coin['minBUYBUSD'];
   
-  return $minQuote;
-  
+  return $minQuote;  
 }
 
 
