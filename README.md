@@ -1,7 +1,7 @@
 # goldstar-crypto-trading-bot
 GoldStar Crypto Trading Bot which can trade based on signals from for example TradeView or any other platform. Buy and Sell actions can be connected as webhooks. You can run as many bots as you like as long as the 'id' differs per bot. All data is stored in CSV files in the data/ folder, containing trades, orders, runtime and other logs. 
 
-GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless due to  unforeseen circumstances).
+GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
 It is possible to trade both in PAPER and LIVE money. When you first start, please use PAPER money to get a feeling for the bot. When using PAPER the bot uses the commission setting from the configuration file, when using real money it derives it from Binance. Please be aware that there will always be a diference between paper and real money because of slippage and other reasons.
 
