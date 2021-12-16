@@ -3,6 +3,7 @@
 /.backup
 
 # Ignore application files
+*.backup
 *2.php
 *3.php
 config.php
