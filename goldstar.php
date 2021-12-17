@@ -19,8 +19,8 @@ if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!
 
 // Configuration
 include "config.php";
-if (empty($fee))    {$fee = 0.1;}
-if (empty($markup)) {$markup = 0.5;}
+if (!isset($fee))    {$fee = 0.1;}
+if (!isset($markup)) {$markup = 0.5;}
 
 // Debug
 $debug          = false;    // Debug mode
@@ -34,14 +34,22 @@ $binanceMinimum = 10;
 $repeatrun = 24 * 60 * 60;
 
 // Filenames
-$id = $_GET["id"]; if (!empty($id)) {$id_temp = $id . "_";}
-$log_all        = "data/log_history.csv";
-$log_trades     = "data/" . $id_temp . "log_trades.csv";
-$log_history    = "data/" . $id_temp . "log_history.csv";
-$log_runs       = "data/" . $id_temp . "log_runs.csv";
-$log_binance    = "data/" . $id_temp . "log_binance.csv";
-$log_settings   = "data/" . $id_temp . "log_settings.csv";
-$log_errors     = "data/" . $id_temp . "log_errors.csv";
+if (isset($_GET["id"])) {
+  $id             = $_GET["id"];
+  $log_all        = "data/log_history.csv";
+  $log_trades     = "data/" . $id . "_log_trades.csv";
+  $log_history    = "data/" . $id . "_log_history.csv";
+  $log_runs       = "data/" . $id . "_log_runs.csv";
+  $log_binance    = "data/" . $id . "_log_binance.csv";
+  $log_settings   = "data/" . $id . "_log_settings.csv";
+  $log_errors     = "data/" . $id . "_log_errors.csv";
+} else {
+  $message = date("Y-m-d H:i:s") . ",Error: ID not set\n";
+  echo $message;
+  if (!file_exists("data/")) {mkdir("data/");}
+  file_put_contents("data/log_errors.csv", $message, FILE_APPEND | LOCK_EX);  
+  exit();
+}
 
 // DIM statements
 $counter        = 0;
@@ -68,7 +76,6 @@ $paper          = true;
 
 /** Functions **/
 include "functions.php";
-
 
 /** Query string **/
 
@@ -120,16 +127,16 @@ if (empty($pair)) {
 }
 
 // Override spread
-$temp_spread = $_GET["spread"];
-if ($temp_spread <> "") {
+if (isset($_GET["spread"])) {
+  $temp_spread = $_GET["spread"];
   if (($temp_spread >= 0) && ($temp_spread < 5)) {
     $spread = $temp_spread;
   }  
 }
 
 // Override profit
-$temp_markup = $_GET["markup"];
-if ($temp_markup <> "") {
+if (isset($_GET["markup"])) {
+  $temp_markup = $_GET["markup"];
   if (($temp_markup >= -10) && ($temp_markup < 25)) {
     $markup = $temp_markup;
   }  
