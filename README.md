@@ -5,7 +5,7 @@ GoldStar automatically determines the smallest possible order value and uses tha
 
 It is possible to trade both in PAPER and LIVE money. When you first start, please use PAPER money to get a feeling for the bot. When using PAPER the bot calculates the commission setting from the configuration file, when using LIVE money it derives it from Binance. Please be aware that there will always be a diference between PAPER and LIVE money because of slippage and other reasons.
 
-The application relies on PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world!
+The application relies on PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world! Preferably also using an https connection on your server.
 
 **How to install**
 
