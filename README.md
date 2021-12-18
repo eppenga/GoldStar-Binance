@@ -15,6 +15,8 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 
 **Usage**
 
+Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key and an https connection!
+
 Simple example where you only set the required parameters. In this case GoldStar PAPER trades the pair MATICBUSD. Please make sure that you only use this for local testing.
 
 BUY:
@@ -38,8 +40,6 @@ BUY:
 
 SELL:
 `https://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&markup=0.7&trade=LIVE&key=12345`
-
-*Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key!*
 
 **Webhooks**
 
