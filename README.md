@@ -15,11 +15,29 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 
 **Usage**
 
+Simple example where you only set the required parameters. In this case GoldStar PAPER trades the pair MATICBUSD. Please make sure that you only use this for local testing.
+
 BUY:
-`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
+`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD`
 
 SELL:
-`http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345`
+`http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD`
+
+The normal way to run GoldStar using LIVE trading preferably via an SSL (https) connection:
+
+BUY:
+`https://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&trade=LIVE&key=12345`
+
+SELL:
+`https://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&trade=LIVE&key=12345`
+
+A more complicated example where you override the spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file.
+
+BUY:
+`https://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
+
+SELL:
+`https://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&markup=0.7&trade=LIVE&key=12345`
 
 *Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key!*
 
