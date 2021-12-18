@@ -62,6 +62,7 @@ $sell           = 0;
 $sell_price     = 0;
 $fees           = 0;
 $markups        = 0;
+$total_buy      = 0;
 $total_fees     = 0;
 $total_orders   = 0;
 $total_profit   = 0;
@@ -185,15 +186,8 @@ if (!$action) {
   echo "<i>Trying to BUY...</i><br /><br /><hr /><br />";
   if ($debug) {$price = $debug_buy;}
 
-  // Minimum order
-  $quantity   = minimumQuote()['minBUY'];
-
-  // Caclulate buy
-  $buy        = $quantity * $price;
-  $commission = $buy * ($fee / 100);
-
   // Check if price is outside spread
-  $nobuy = false;
+  $nobuy     = false;
   $price_min = $price * (1 - $spread / 100);
   $price_max = $price * (1 + $spread / 100);
       
@@ -209,6 +203,17 @@ if (!$action) {
    
   if ((!$nobuy) || ($spread == 0)) {
     // We can buy if spread = 0 or there is no adjacent order
+
+    // Minimum order
+    $quantity   = minimumQuote()['minBUY'];
+  
+    // Caclulate buy
+    $buy        = $quantity * $price;
+    $commission = $buy * ($fee / 100);
+    
+    // Set for reporting
+    $total_buy      = $buy;
+    $total_quantity = $quantity;
     
     // Paper or live trading
     if ($paper) {
@@ -218,7 +223,7 @@ if (!$action) {
       $order = $api->marketBuy($pair, $quantity);
       logCommand($order, "binance");
     }
-  
+
     // Report basic information
     echo "Quantity   : " . $quantity . "<br />";
     echo "BUY Price  : " . $price . "<br />";   
@@ -229,10 +234,11 @@ if (!$action) {
     if (!$paper) {
 
       // Adjust
-      $price      = extractBinance($order)['price'];
-      $quantity   = extractBinance($order)['base'];
-      $buy        = extractBinance($order)['quote'];
-      $commission = extractBinance($order)['commission'] * $price;
+      $price          = extractBinance($order)['price'];
+      $quantity       = extractBinance($order)['base'];
+      $buy            = extractBinance($order)['quote'];
+      $commission     = extractBinance($order)['commission'] * $price;
+      $total_quantity = $quantity;
 
       // Report
       echo "<b>LIVE Trade</b><br />";
@@ -246,14 +252,14 @@ if (!$action) {
       echo "Status     : " . $order['status'] . "<br /><br />";    
     }
     echo "<hr /><br />";
-  
+
     // Update log files
     $unique_id = uniqid();
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
     logCommand($message, "buy");
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . "," . (-1 * $commission) . "," . $tradetype;
     logCommand($message, "history");
-    logCommand($message, "all");    
+    logCommand($message, "all");
   } else {
     echo "<i>Price in range of existing buy order, skipping...</i><br /><br /><hr /><br />";
   }
@@ -284,7 +290,7 @@ if ($action) {
       $markups    = ($quantity * $price) * ($markup / 100);      // Total markup based on total BUY funds 
       $sell       = ($quantity * $price);                        // Total SELL
       $sell_price = $sell / $quantity;                           // Sell price
-      $profit       = $sell - $buy - $fees;                      // Profit
+      $profit     = $sell - $buy - $fees;                      // Profit
 
       if ($paper) {echo "<b>Paper Order ";} else {echo "<b>LIVE Order ";}
       echo $counter . "</b><br /><br />";
@@ -384,7 +390,7 @@ if ($total_orders > 0) {
 
 // Log to runtime file
 echo "<i>Updating " . $log_runs . " file...</i><br />";
-$message = date("Y-m-d H:i:s") . "," . $pair . "," . $command . "," . max($quantity, $total_quantity) . "," . max($buy, $total_sell);
+$message = date("Y-m-d H:i:s") . "," . $pair . "," . $command . "," . $total_quantity . "," . max($total_buy, $total_sell);
 logCommand($message, "run");
 
 // End program
