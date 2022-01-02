@@ -40,6 +40,7 @@ if ($settings_check) {
   			} else if ( $filter["filterType"] == "PRICE_FILTER" ) {
   				$filters["minPrice"] = $filter["minPrice"];
   				$filters["maxPrice"] = $filter["maxPrice"];
+  				$filters["tickSize"] = $filter["tickSize"];          
   			} else if ( $filter["filterType"] == "LOT_SIZE" ) {
   				$filters["minQty"] = $filter["minQty"];
   				$filters["maxQty"] = $filter["maxQty"];
@@ -55,12 +56,13 @@ if ($settings_check) {
   $set_coin['baseAsset']   = $minimums[$pair]['baseAsset'];
   $set_coin['quoteAsset']  = $minimums[$pair]['quoteAsset'];
   $set_coin['minNotional'] = $minimums[$pair]['minNotional'];
-  $set_coin['stepSize']    = $minimums[$pair]['stepSize']; 
+  $set_coin['stepSize']    = $minimums[$pair]['stepSize'];
+  $set_coin['tickSize']    = $minimums[$pair]['tickSize'];  
 
-  // Write new settings file: pair, status, baseAsset, quoteAsset, minNotional, stepSize
+  // Write new settings file: pair, status, baseAsset, quoteAsset, minNotional, stepSize, tickSize
   $message  = $set_coin['symbol'] . "," . $set_coin['status'] . ",";
   $message .= $set_coin['baseAsset'] . "," . $set_coin['quoteAsset'] .","; 
-  $message .= $set_coin['minNotional'] . "," . $set_coin['stepSize'];
+  $message .= $set_coin['minNotional'] . "," . $set_coin['stepSize'] . "," . $set_coin['tickSize'];
   file_put_contents($log_settings, $message);
 
   // Report
@@ -70,7 +72,8 @@ if ($settings_check) {
   echo "baseAsset      : " . $set_coin['baseAsset'] . "<br />";
   echo "quoteAsset     : " . $set_coin['quoteAsset'] . "<br />";
   echo "minNotional    : " . $set_coin['minNotional'] . "<br />";
-  echo "Stepsize       : " . $set_coin['stepSize'] . "<br /><br />";
+  echo "stepSize       : " . $set_coin['stepSize'] . "<br />";
+  echo "tickSize       : " . $set_coin['tickSize'] . "<br /><br />";
 
   // Determine minimum quote quantity to meet Binance minimum order value
   $set_coin_temp = minimumQuote();
@@ -82,7 +85,7 @@ if ($settings_check) {
    
   // Check if we can continue
   if ($set_coin['status'] <> "TRADING") {
-    $message = date("Y-m-d H:i:s") . ",Error: Pair not trading";
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Pair not trading";
     echo $message;
     logCommand($message, "error");
     exit();

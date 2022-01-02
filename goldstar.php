@@ -7,6 +7,9 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
+ * For more information please see:
+ * https://github.com/eppenga/goldstar-crypto-trading-bot
+ *
  */
 
 // Set error reporting and config check
@@ -36,13 +39,12 @@ $repeatrun = 24 * 60 * 60;
 // Filenames
 if (isset($_GET["id"])) {
   $id             = $_GET["id"];
-  $log_all        = "data/log_history.csv";
-  $log_trades     = "data/" . $id . "_log_trades.csv";
-  $log_history    = "data/" . $id . "_log_history.csv";
-  $log_runs       = "data/" . $id . "_log_runs.csv";
-  $log_binance    = "data/" . $id . "_log_binance.csv";
-  $log_settings   = "data/" . $id . "_log_settings.csv";
-  $log_errors     = "data/" . $id . "_log_errors.csv";
+  $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
+  $log_history    = "data/" . $id . "_log_history.csv";     // History
+  $log_runs       = "data/" . $id . "_log_runs.csv";        // Executing log
+  $log_binance    = "data/" . $id . "_log_binance.csv";     // Responses from Binance
+  $log_settings   = "data/" . $id . "_log_settings.csv";    // Binance settings
+  $log_errors     = "data/" . $id . "_log_errors.csv";      // Errors
 } else {
   $message = date("Y-m-d H:i:s") . ",Error: ID not set\n";
   echo $message;
@@ -52,9 +54,9 @@ if (isset($_GET["id"])) {
 }
 
 // DIM statements
-$counter        = 0;
 $buy            = 0;
 $buy_price      = 0;
+$counter        = 0;
 $price          = 0;
 $profit         = 0;
 $quantity       = 0;
@@ -73,18 +75,19 @@ $message        = "";
 $order          = "";
 $pair           = "";
 $trades         = "";
+$limit          = false;
 $paper          = true;
 
 /** Functions **/
 include "functions.php";
 
-/** Query string **/
+/** Query string parameters **/
 
 // Get and validate key
 $get_url_key = $_GET["key"];
 if (!empty($url_key)) {
   if ($get_url_key <> $url_key) {
-    $message = date("Y-m-d H:i:s") . ",Error: Security key did not validate";
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Security key did not validate";
     echo $message;
     logCommand($message, "error");
     exit();
@@ -97,7 +100,7 @@ if (empty($tradetype)) {
   $tradetype = "PAPER";
 } elseif (($tradetype <> "LIVE") &&
           ($tradetype <> "PAPER")) {
-  $message = date("Y-m-d H:i:s") . ",Error: Trading type incorrect";
+  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Trading type incorrect";
   echo $message;
   logCommand($message, "error");
   exit();            
@@ -112,7 +115,7 @@ if ($command == "BUY") {
 } elseif ($command == "SELL") {
   $action = True;
 } else {
-  $message = date("Y-m-d H:i:s") . ",Error: No BUY or SELL";
+  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No BUY or SELL";
   echo $message;
   logCommand($message, "error");
   exit();
@@ -121,10 +124,26 @@ if ($command == "BUY") {
 // Get pair
 $pair = strtoupper($_GET["pair"]);
 if (empty($pair)) {
-  $message = date("Y-m-d H:i:s") . ",Error: No pair given";
+  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No pair given";
   echo $message;
   logCommand($message, "error");
   exit();
+}
+
+// Limit order
+if (isset($_GET["limit"])) {
+  $limit = strtoupper($_GET["limit"]);
+  if ($limit == "TRUE") {
+    $limit = true;
+    if ($tradetype <> "LIVE") {
+      $message = date("Y-m-d H:i:s") . "," . $id . ",Error: LIMIT order can only work with LIVE trading";      
+      echo $message;
+      logCommand($message, "error");
+      exit();
+    }
+  } else {
+    $limit = false;
+  }
 }
 
 // Override spread
@@ -151,7 +170,6 @@ $api = new Binance\API($binance_key,$binance_secret);
 
 /** Check if all files exist and if not create empty files **/
 if (!file_exists("data/"))      {mkdir("data/");}
-if (!file_exists($log_all))     {file_put_contents($log_all, "");}
 if (!file_exists($log_trades))  {file_put_contents($log_trades, "");}
 if (!file_exists($log_runs))    {file_put_contents($log_runs, "");}
 if (!file_exists($log_history)) {file_put_contents($log_history, "");}
@@ -159,7 +177,7 @@ if (!file_exists($log_binance)) {file_put_contents($log_binance, "");}
 if (!file_exists($log_errors))  {file_put_contents($log_errors, "");}
 
 
-/** START PROGRAM **/
+/*** START PROGRAM ***/
 echo '<!DOCTYPE HTML>
 <html>
 <head>
@@ -170,21 +188,31 @@ echo '<!DOCTYPE HTML>
 <body>';
 
 echo "<pre>";
-echo "<h1>Goldstar Bot</h1>";
+echo "<h2>Goldstar Bot@" . date("Y-m-d H:i:s") . "</h2>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
+
+echo "Bot ID : " . $id . "<br />";
+echo "Pair   : " . $pair . "<br />";
+echo "Spread : " . $spread . "%<br />";
+echo "Markup : " . $markup . "%<br />";
+echo "Command: " . $command;
+if ($limit) {echo " / LIMIT ";}
+echo "(" . $tradetype . ")<br /><br /><hr /><br />";
 
 /** Get price of pair **/
 $price = $api->price($pair);
-
 
 /** Check if we have enough to pay fees and get important variables **/
 include "checkbase.php";
 
 
-/** BUY action **/
+/*** BUY action ***/
 if (!$action) {
   echo "<i>Trying to BUY...</i><br /><br /><hr /><br />";
   if ($debug) {$price = $debug_buy;}
+
+  // Check if there are sold LIMIT orders
+  if ($limit) {include("limit_sold.php");}
 
   // Check if price is outside spread
   $nobuy     = false;
@@ -201,8 +229,8 @@ if (!$action) {
   }
   fclose($handle);
    
+  // We can buy if spread = 0 or there is no adjacent order
   if ((!$nobuy) || ($spread == 0)) {
-    // We can buy if spread = 0 or there is no adjacent order
 
     // Minimum order
     $quantity   = minimumQuote()['minBUY'];
@@ -219,7 +247,18 @@ if (!$action) {
     if ($paper) {
       echo "<b>Paper Order</b><br />";
     } else {
-      echo "<b>LIVE Order</b><br />";
+      echo "<b>LIVE BUY Order</b><br />";
+      
+      // Check if we have enough quote balance to buy
+      $quantityQuote = minimumQuote()['balanceQuote'];
+      if ($quantityQuote < (2 * $buy)) {
+        $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Insufficient funds to BUY";
+        echo "<font color=\"red\"><b>" . $message . "</b></font><br /><br />";
+        logCommand($message, "error");
+        exit();
+      }
+      
+      // BUY BUY BUY!
       $order = $api->marketBuy($pair, $quantity);
       logCommand($order, "binance");
     }
@@ -234,6 +273,7 @@ if (!$action) {
     if (!$paper) {
 
       // Adjust
+      $unique_id      = extractBinance($order)['order'];
       $price          = extractBinance($order)['price'];
       $quantity       = extractBinance($order)['base'];
       $buy            = extractBinance($order)['quote'];
@@ -241,7 +281,7 @@ if (!$action) {
       $total_quantity = $quantity;
 
       // Report
-      echo "<b>LIVE Trade</b><br />";
+      echo "<b>LIVE BUY Trade</b><br />";
       echo "Quantity   : " . $quantity . "<br />";
       echo "BUY Price  : " . $price . "<br />";   
       echo "BUY Total  : " . $buy  . "<br />";
@@ -249,24 +289,29 @@ if (!$action) {
       echo "Symbol     : " . $order['symbol'] . "<br />";
       echo "Order ID   : " . $order['orderId'] . "<br />";
       echo "Time       : " . $order['transactTime'] . "<br />";
-      echo "Status     : " . $order['status'] . "<br /><br />";    
+      echo "Status     : " . $order['status'] . "<br /><br />";
+      
+      // Add a limit order
+      if ($limit) {include("limit.php");}
+      
     }
+
     echo "<hr /><br />";
 
-    // Update log files
-    $unique_id = uniqid();
+    // Update log files for BUY order
+    if (!isset($unique_id)) {$unique_id = uniqid();}
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
     logCommand($message, "buy");
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . "," . (-1 * $commission) . "," . $tradetype;
     logCommand($message, "history");
-    logCommand($message, "all");
+
   } else {
     echo "<i>Price in range of existing buy order, skipping...</i><br /><br /><hr /><br />";
-  }
+  }  
 }
 
 
-/** SELL action **/
+/*** SELL action ***/
 if ($action) {
   echo "<i>Trying to SELL...</i><br /><br /><hr /><br />";
 
@@ -282,17 +327,17 @@ if ($action) {
       // Count and calculate BUY and SELL
       $counter    = $counter + 1;                                // General counter
       $quantity   = $line[5];                                    // Total BUY quantity
-      $buy        = $line[6];                                    // Total BUY funds
+      $buy        = $line[6];                                    // Total BUY funds (quantity * price)
       $buy_price  = $buy / $quantity;                            // Buy price
       $buy_fee    = $buy * ($fee / 100);                         // Buy fee
       $sell_fee   = ($quantity * $price) * ($fee / 100);         // Sell fee
-      $fees       = $buy_fee + $sell_fee;                        // Total fees from BUY plus SELL
+      $fees       = $buy_fee + $sell_fee;                        // Total fees(BUY plus SELL fees)
       $markups    = ($quantity * $price) * ($markup / 100);      // Total markup based on total BUY funds 
       $sell       = ($quantity * $price);                        // Total SELL
       $sell_price = $sell / $quantity;                           // Sell price
-      $profit     = $sell - $buy - $fees;                      // Profit
+      $profit     = $sell - $buy - $fees;                        // Profit
 
-      if ($paper) {echo "<b>Paper Order ";} else {echo "<b>LIVE Order ";}
+      if ($paper) {echo "<b>Paper Order ";} else {echo "<b>LIVE SELL Order ";}
       echo $counter . "</b><br /><br />";
       echo "<i>BUY</i>" . "<br />";
       echo "Quantity   : " . $quantity . "<br />";
@@ -309,9 +354,8 @@ if ($action) {
       echo "Commission : " . $sell_fee . " (" . $fee . "%)<br />";        
       echo "Profit     : " . $profit . "<br /><br />";
 
-      
+      // We can SELL with profit!!
       if (($sell - $fees - $markups) >= $buy) {
-        // We can SELL with profit!!
 
         // Do some calculations for now and later
         $total_orders   = $total_orders + 1;
@@ -320,10 +364,10 @@ if ($action) {
         $total_sell     = $total_sell + $sell;
         $total_fees     = $total_fees + $fees;
         
+        // Executing LIVE Trade
         if (!$paper) {
-        // LIVE Trade          
          
-          // Excute
+          // SELL SELL SELL!
           $order = $api->marketSell($pair, $quantity);
           logCommand($order, "binance");
 
@@ -336,7 +380,7 @@ if ($action) {
           $profit     = $sell - $buy - ($buy_fee + $commission);
           
           // Report
-          echo "<b>LIVE Trade</b><br />";
+          echo "<b>LIVE SELL Trade</b><br />";
           echo "Quantity   : " . $quantity . "<br />";
           echo "SELL Price : " . $price . "<br />";
           echo "SELL Total : " . $sell . "<br />";
@@ -378,14 +422,13 @@ if ($total_orders > 0) {
   echo "Average price : " . (($total_sell + $total_fees) / $total_quantity) . "<br />";
   echo "Total profit  : " . $total_profit . "<br /><br />";
   
-  // Create new $log_trades file
+  // Create new trades log file
   echo "<i>Creating " . $log_trades . " file...</i><br />";
   file_put_contents($log_trades, $trades);
   
   // Log to history file
   echo "<i>Updating " . $log_history . " file...</i><br />";
-  LogCommand($history, "history");
-  LogCommand($history, "all");
+  logCommand($history, "history");
 }
 
 // Log to runtime file
@@ -394,7 +437,7 @@ $message = date("Y-m-d H:i:s") . "," . $pair . "," . $command . "," . $total_qua
 logCommand($message, "run");
 
 // End program
-echo "<i>Ending program...</i>";
+echo "<i>Ending program...</i><br />";
 
 echo "</pre>
 
