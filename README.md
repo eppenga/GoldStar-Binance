@@ -50,6 +50,8 @@ If you execute the example below every minute you will deploy a grid bot trading
 BUY:
 `http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true&trade=live`
 
+![Running GoldStar as a gridbot](https://share.cryptowat.ch/charts/c78p35up6bmlauced66g-binance-onebusd.png)
+
 **Webhooks**
 
 Please use the URLs above in TradingView (or any other platform) and set them up as webhooks. If you do not know what webhooks are, please forget about this application :) More information on these webhooks can be found here: https://www.google.com/search?q=tradingview+webhook
