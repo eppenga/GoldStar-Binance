@@ -1,6 +1,7 @@
 # Ignore hidden folders
 /.archive
 /.backup
+/.examples
 
 # Ignore application files
 *.backup

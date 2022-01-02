@@ -13,15 +13,46 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 2) Install 'GoldStar Trading Bot' (this application)
 3) Copy config.example.php to config.php and modify
 
-**Usage**
+**Using GoldStar as a signalbot**
+
+Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key and an https connection! Please find below some real world setups on how to run GoldStar.
+
+Simple example where you only set the required parameters initiating PAPER trades on the pair MATICBUSD, usefull for local testing to get to know the bot:
 
 BUY:
-`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
+`http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD`
 
 SELL:
-`http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD&spread=0.5&markup=0.7&trade=LIVE&key=12345`
+`http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD`
 
-*Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key!*
+The normal way to run GoldStar using LIVE trading preferably via an SSL (https) connection:
+
+BUY:
+`https://foo.com/path/goldstar.php?id=a2&action=BUY&pair=MATICBUSD&trade=LIVE&key=12345`
+
+SELL:
+`https://foo.com/path/goldstar.php?id=a2&action=SELL&pair=MATICBUSD&trade=LIVE&key=12345`
+
+A more complicated example where you override the spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
+
+BUY:
+`https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
+
+SELL:
+`https://foo.com/path/goldstar.php?id=a3&action=SELL&pair=MATICBUSD&markup=0.7&trade=LIVE&key=12345`
+
+![Running GoldStar as a signalbot](https://share.cryptowat.ch/charts/c78p54ltqnga5k7ql48g-binance-rosebusd.png)
+
+**Using GoldStar as a gridbot**
+
+GoldStar can also be used as a gridbot. In that case it will only execute BUY MARKET orders on Binance and schedule LIMIT SELL orders with a predefined profit percentage. You will need some external tooling to call GoldStar every so many seconds or minutes. Usually a timeschedule of every minute is more than enough. A normal CURL, or if you would like to monitor the output the command line browser Lynx suffices, please see: https://lynx.invisible-island.net/
+
+If you execute the example below every minute you will deploy a grid bot trading on SYSLIMIT spreading the BUY orders 0.9% between each other and setting the profit margin to 0.9% by using a LIMIT SELL order. Gridbots can only be executed using LIVE trading, not PAPER, because it is currently not possible to deal with LIMIT SELL orders on PAPER.
+
+BUY:
+`http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true&trade=live`
+
+![Running GoldStar as a gridbot](https://share.cryptowat.ch/charts/c78p35up6bmlauced66g-binance-onebusd.png)
 
 **Webhooks**
 
@@ -41,15 +72,21 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 - spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional)
 - markup   - Minimum profit. Defaults to setting in config.php (optional)
 
-**Logfiles**
+**Logfiles and analyses**
 
-- $log_all       - History of all trades for all coins
-- $log_trades    - Contains bag of trades per coin
-- $log_history   - History of all trades per coin
-- $log_runs      - Runtime log of executions per coin
-- $log_settings	 - Binance settings per coin
-- $log_binance   - Log of all Binance responses per coin
-- $log_errors    - Log of all errors per coin
+All logs reside in the 'data/' folder and are seperated per bot (usually you run a bot per pair so per pair). Also there is some special functionality that allows you to retreive a combined log of all bots. 
+
+- \*_log_history.csv  - History of all trades per coin
+- \*_log_trades.csv   - All active trades per coin (also known as bags)
+- \*_log_runs.csv     - Runtime log of executions per coin
+- \*_log_settings.csv	- Binance settings per coin
+- \*_log_binance.csv  - Log of all Binance responses per coin
+- \*_log_errors.csv   - Log of all errors per coin
+
+http://foo.com/path/log_combine.php?files=history|trades|errors displays in the browser and creates files below which can be used in for Google Sheets.
+- log_history.csv     - History of all trades for all coins
+- log_trades.csv      - All active trades for all coins
+- log_errors.csv      - Log of all errors for all coins
 
 **Format $log_trades**
 
@@ -61,4 +98,4 @@ Date, Pair, BUY / SELL, Base, Quote. In this file all open orders are stored, th
 
 `2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,LIVE`
 
-Date, Pair, BUY / SELL, Base, Quote, Profit, LIVE / PAPER. The $log_history contains all actual BUY and SELLs trades for a certain pair. You can also use $log_all for a complete overview of all pairs and use for analysis.
+Date, Pair, BUY / SELL, Base, Quote, Profit, LIVE / PAPER. The $log_history contains all actual BUY and SELLs trades for a certain pair.
