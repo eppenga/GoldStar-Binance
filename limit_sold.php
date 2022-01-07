@@ -16,9 +16,8 @@
 // Determine a random so it only checks all Binance trades every 10th time
 $go_check    = false;
 $limit_check = false;
-if (rand(0, 10) == 5) {
-  $limit_check = true;
-}
+if (rand(0, 10) == 5)   {$limit_check = true;}
+if ($action == "CHECK") {$limit_check = true;}
 
 // Loop through trades
 $handle1 = fopen($log_trades, "r");
