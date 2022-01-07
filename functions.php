@@ -99,7 +99,7 @@ function extractBinance($order) {
 function minimumQuote() {
 
   // Declare some variables as global
-  global $api, $binanceMinimum, $log_settings;
+  global $api, $binanceMinimum, $log_settings, $compounding;
 
   // Get settings
   if (file_exists($log_settings)) {
@@ -127,6 +127,19 @@ function minimumQuote() {
   $set_coin['balance']      = $balance;
   $set_coin['balanceQuote'] = $balanceQuote;
 
+  // Calculate total Binance balance and compouding in BUSD (only necessary when compounding)
+  if (!empty($compounding)) {
+    $TbalanceBTC  = $api->btc_total;
+    $btc_price    = $api->price("BTCBUSD");
+    $TbalanceBUSD = $TbalanceBTC * $btc_price;  
+    if ($set_coin['quoteAsset'] <> 'BUSD') {
+      $comp_pair  = $set_coin['baseAsset'] . 'BUSD';
+      $comp_BUSD  = $api->price($comp_pair);
+    } else {
+      $comp_BUSD  = $compounding;
+    }    
+  }
+  
   // Get price of coin in BUSD
   $pair_BUSD = $set_coin['baseAsset'] . 'BUSD';
   $set_coin['priceBUSD'] = $api->price($pair_BUSD);
@@ -135,9 +148,26 @@ function minimumQuote() {
   $set_coin['balanceBUSD'] = $set_coin['balance'] * $set_coin['priceBUSD'];
   
   // Check if notional is below the 10 BUSD (+10% to prevent issues) Binance threshold
-  $set_coin['minBUY'] = ($binanceMinimum * 1.1) / $set_coin['priceBUSD'];
-  $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
+  $set_coin['minBUY']     = ($binanceMinimum * 1.1) / $set_coin['priceBUSD'];
   $set_coin['minBUYBUSD'] = $binanceMinimum * 1.1;  
+
+  // Correct for compounding only when compounding is set and in profit (> 1)
+  if (!empty($compounding)) {
+    if (($TbalanceBUSD / $comp_BUSD) > 1) {
+      $set_coin['minBUY']     = $set_coin['minBUY'] * ($TbalanceBUSD / $comp_BUSD);
+      $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * ($TbalanceBUSD / $comp_BUSD);
+      /*
+      echo "<i>Compounding multiplier active at x" . ($TbalanceBUSD / $comp_BUSD) . "</i><br /><br /><hr /><br />";
+      echo "Total Balance BUSD: " . $TbalanceBTC . "<br>";
+      echo "Compound in BUSD: " . $comp_BUSD . "<br>";
+      echo "minBUY: " . $set_coin['minBUY'] . "<br>";
+      echo "minBUYBUSD: " . $set_coin['minBUYBUSD'] . "<br>";
+      */      
+    }
+  }
+  
+  // Fix Binance stepSize precission error
+  $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
 
   // Report
   if ($debug) {
@@ -145,8 +175,11 @@ function minimumQuote() {
     echo "Price in BUSD  : " . $set_coin['priceBUSD'] . "<br />";
     echo "Balance in Base: " . $set_coin['balance'] . "<br />";
     echo "Balance in BUSD: " . $set_coin['balanceBUSD'] . "<br />";
+    if (!empty($compounding)) {echo "Compounding    : " . ($TbalanceBUSD / $comp_BUSD) . "<br />";}
     echo "Min BUY in Base: " . $set_coin['minBUY'] . "<br />";
-    echo "Min BUY in BUSD: " . $set_coin['minBUYBUSD'] . "<br /><br />";    
+    echo "Min BUY in BUSD: " . $set_coin['minBUYBUSD'] . "<br />";
+    if (!empty($compounding)) {echo "<i>Compounding multiplies minBUY(BUSD) by factor given.</i><br />";}
+    echo "<br />";
   }
   
   // Return enough data
@@ -160,8 +193,8 @@ function minimumQuote() {
   $minQuote['balance']      = $set_coin['balance'];        // How much of the base asset is available on Binance
   $minQuote['balanceBUSD']  = $set_coin['balanceBUSD'];    // The above only then expressed in BUSD
   $minQuote['balanceQuote'] = $set_coin['balanceQuote'];   // How much of the quote asset is available on Binance  
-  $minQuote['minBUY']       = $set_coin['minBUY'];         // Minimum buy value in base
-  $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum buy value in BUSD
+  $minQuote['minBUY']       = $set_coin['minBUY'];         // Minimum BUY value in base (possibly corrected for compounding!)
+  $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
   
   return $minQuote;  
 }
@@ -170,8 +203,10 @@ function minimumQuote() {
 /** Round value to the nearest stepSize **/
 function roundStep($value, $stepSize = 0.1) {
 
-  $precision = strlen(substr(strrchr(rtrim($value,'0'), '.'), 1));
-  return round((($value / $stepSize) | 0) * $stepSize, $precision);
+  $precision = log10((1 / $stepSize));
+  $value = round($value, $precision);
+  
+  return $value;
 }
 
 ?>

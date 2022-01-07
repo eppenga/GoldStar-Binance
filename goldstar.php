@@ -108,14 +108,16 @@ if (empty($tradetype)) {
 if ($tradetype == "PAPER") {$paper = true;} else {$paper = false;}
 if ($paper) {$tradetype = "PAPER";} else {$tradetype = "LIVE";}
 
-// Get BUY (False) or SELL (True) command 
+// Get BUY, SELL or CHECK command 
 $command = strtoupper($_GET["action"]);
 if ($command == "BUY") {
-  $action = False;
+  $action = "BUY";
 } elseif ($command == "SELL") {
-  $action = True;
+  $action = "SELL";
+} elseif ($command == "CHECK") {
+  $action = "CHECK";
 } else {
-  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No BUY or SELL";
+  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No BUY, SELL or CHECK";
   echo $message;
   logCommand($message, "error");
   exit();
@@ -151,7 +153,12 @@ if (isset($_GET["spread"])) {
   $temp_spread = $_GET["spread"];
   if (($temp_spread >= 0) && ($temp_spread < 5)) {
     $spread = $temp_spread;
-  }  
+  } else {
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Spread can only be between 0% and 5%";      
+    echo $message;
+    logCommand($message, "error");
+    exit();    
+  }
 }
 
 // Override profit
@@ -159,7 +166,17 @@ if (isset($_GET["markup"])) {
   $temp_markup = $_GET["markup"];
   if (($temp_markup >= -10) && ($temp_markup < 25)) {
     $markup = $temp_markup;
-  }  
+  } else {
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Markup can only be between -10% and 25%";      
+    echo $message;
+    logCommand($message, "error");
+    exit();        
+  }
+}
+
+// Get compounding base
+if (isset($_GET["comp"])) {
+  $compounding = $_GET["comp"];
 }
 
 
@@ -191,13 +208,14 @@ echo "<pre>";
 echo "<h2>Goldstar Bot@" . date("Y-m-d H:i:s") . "</h2>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
 
-echo "Bot ID : " . $id . "<br />";
-echo "Pair   : " . $pair . "<br />";
-echo "Spread : " . $spread . "%<br />";
-echo "Markup : " . $markup . "%<br />";
-echo "Command: " . $command;
-if ($limit) {echo " / LIMIT ";}
-echo "(" . $tradetype . ")<br /><br /><hr /><br />";
+echo "Bot ID     : " . $id . "<br />";
+echo "Pair       : " . $pair . "<br />";
+echo "Spread     : " . $spread . "%<br />";
+echo "Markup     : " . $markup . "%<br />";
+if (!empty($compounding)) {echo "Compounding: ACTIVE<br />";}
+echo "Command    : " . $action;
+if ($limit) {echo " / LIMIT";}
+echo " (" . $tradetype . ")<br /><br /><hr /><br />";
 
 /** Get price of pair **/
 $price = $api->price($pair);
@@ -206,8 +224,14 @@ $price = $api->price($pair);
 include "checkbase.php";
 
 
+/*** CHECK action ***/
+if ($action == "CHECK") {
+  include("limit_sold.php");
+}
+
+
 /*** BUY action ***/
-if (!$action) {
+if ($action == "BUY") {
   echo "<i>Trying to BUY...</i><br /><br /><hr /><br />";
   if ($debug) {$price = $debug_buy;}
 
@@ -234,7 +258,7 @@ if (!$action) {
 
     // Minimum order
     $quantity   = minimumQuote()['minBUY'];
-  
+      
     // Caclulate buy
     $buy        = $quantity * $price;
     $commission = $buy * ($fee / 100);
@@ -312,7 +336,7 @@ if (!$action) {
 
 
 /*** SELL action ***/
-if ($action) {
+if ($action == "SELL") {
   echo "<i>Trying to SELL...</i><br /><br /><hr /><br />";
 
   // Loop through all the BUY orders
@@ -433,7 +457,7 @@ if ($total_orders > 0) {
 
 // Log to runtime file
 echo "<i>Updating " . $log_runs . " file...</i><br />";
-$message = date("Y-m-d H:i:s") . "," . $pair . "," . $command . "," . $total_quantity . "," . max($total_buy, $total_sell);
+$message = date("Y-m-d H:i:s") . "," . $pair . "," . $action . "," . $total_quantity . "," . max($total_buy, $total_sell);
 logCommand($message, "run");
 
 // End program
