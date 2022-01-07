@@ -10,7 +10,6 @@
 config.php
 tests.php
 todo.txt
-report.php
 /data
 
 # Ignore jaggedsoft/php-binance-api
