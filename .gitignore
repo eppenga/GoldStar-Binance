@@ -8,7 +8,7 @@
 *2.php
 *3.php
 config.php
-tests.php
+test*.php
 todo.txt
 /data
 

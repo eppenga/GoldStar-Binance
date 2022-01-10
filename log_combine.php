@@ -8,7 +8,7 @@
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
  * log_combine.php?files=history|trades
- * Combines all the data/*_log_history.csv or data/*_log_trades.csv files 
+ * Combines all the data/*_log_history|trades|errors.csv files 
  * If left empty defaults to *_log_history.csv files
  * 
  */
@@ -26,6 +26,8 @@ if (isset($_GET["files"])) {
     $logfiles = "log_trades.csv";
   } elseif ($_GET["files"] == "errors") {
     $logfiles = "log_errors.csv";
+  } elseif ($_GET["files"] == "fees") {
+    $logfiles = "log_errors.csv";
   } else {
     echo "Error: Undefined what combined log to create!";
     exit();
@@ -40,7 +42,7 @@ if (!file_exists($data)) {echo "Error: No data folder!"; exit();}
 // Get file list
 $files = scandir($data);
 
-// Filter all *_log_history.csv files
+// Filter all *_log_history|trades|errors.csv files
 foreach ($files as &$file) {
   if (strpos($file, "_" . $logfiles) !== false) {
     $csvfiles[] = $file;

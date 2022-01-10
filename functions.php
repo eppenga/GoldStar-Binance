@@ -17,7 +17,7 @@
 function logCommand($logcommand, $type) {
   
   // Declare some variables as global
-  global $log_trades, $log_history, $log_runs, $log_errors, $log_binance;
+  global $log_trades, $log_history, $log_fees, $log_runs, $log_errors, $log_binance;
 
   if ($type <> "binance") {
     // Standard log format
@@ -37,6 +37,9 @@ function logCommand($logcommand, $type) {
   } elseif ($type == "history") {
     // Store in historical log
     file_put_contents($log_history, $message, FILE_APPEND | LOCK_EX);    
+  } elseif ($type == "fee") {
+    // Store in historical log
+    file_put_contents($log_fees, $message, FILE_APPEND | LOCK_EX);    
     } elseif ($type == "run") {
     // Store in runtime log
     file_put_contents($log_runs, $message, FILE_APPEND | LOCK_EX);    
@@ -127,6 +130,12 @@ function minimumQuote() {
   $set_coin['balance']      = $balance;
   $set_coin['balanceQuote'] = $balanceQuote;
 
+  // Get balance and price of BNB
+  $balanceBNB   = $balances['BNB']['available'];
+  $priceBNB     = $api->price("BNB" . $set_coin['quoteAsset']);  
+  $set_coin['balanceBNB']   = $balanceBNB;
+  $set_coin['priceBNB']     = $priceBNB;
+
   // Calculate total Binance balance and compouding in BUSD (only necessary when compounding)
   if (!empty($compounding)) {
     $TbalanceBTC  = $api->btc_total;
@@ -144,7 +153,7 @@ function minimumQuote() {
   $pair_BUSD = $set_coin['baseAsset'] . 'BUSD';
   $set_coin['priceBUSD'] = $api->price($pair_BUSD);
 
-  // Get balance of the coin in BUSD
+  // Get balance and price of the coin in BUSD
   $set_coin['balanceBUSD'] = $set_coin['balance'] * $set_coin['priceBUSD'];
   
   // Check if notional is below the 10 BUSD (+10% to prevent issues) Binance threshold
@@ -195,6 +204,8 @@ function minimumQuote() {
   $minQuote['balanceQuote'] = $set_coin['balanceQuote'];   // How much of the quote asset is available on Binance  
   $minQuote['minBUY']       = $set_coin['minBUY'];         // Minimum BUY value in base (possibly corrected for compounding!)
   $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
+  $minQuote['balanceBNB']   = $set_coin['balanceBNB'];     // Current amount of BNB for paying fees
+  $minQuote['priceBNB']     = $set_coin['priceBNB'];       // Current price of BNB for paying fees 
   
   return $minQuote;  
 }

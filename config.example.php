@@ -19,9 +19,10 @@
 
 
 // User settings
-$fee            = 0.1;      // Fee in percentages
-$markup         = 0.5;      // Minimum profit per trade
-$spread         = 0.75;     // Minimym spread between buy orders
+$fee            = 0.1;      // Binance fee in percentage
+$markup         = 0.5;      // Minimum profit percentage per trade
+$spread         = 0.75;     // Minimym spread percentage between buy orders
+$bnb            = 0.1;      // Minimum BNB (+/-50%) to keep for paying fees
 
 // Binance keys (ALWAYS KEEP THESE SECRET!)
 $binance_key    = "1234567890";

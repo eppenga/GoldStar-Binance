@@ -13,7 +13,6 @@
  * 
  */
 
-
 // Check if settings are less than 24h old or exist
 $settings_check = false;
 if (!file_exists($log_settings)) {
@@ -22,9 +21,10 @@ if (!file_exists($log_settings)) {
   $settings_check = true;
 }
 
-// Determine minNotional, baseAsset, quoteAsset, etc..
+// Do we really need to check?
 if ($settings_check) {
   
+// Determine minNotional, baseAsset, quoteAsset, etc..
   echo "<i>Creating new settings file...</i></br /><br />";
   $info = $api->exchangeInfo();
   $minimums = [];
@@ -50,58 +50,29 @@ if ($settings_check) {
   $minimums[$symbols["symbol"]] = $filters;
   }
 
-  // Create an array of usefull values
-  $set_coin['symbol']      = $pair;
-  $set_coin['status']      = $minimums[$pair]['status'];
-  $set_coin['baseAsset']   = $minimums[$pair]['baseAsset'];
-  $set_coin['quoteAsset']  = $minimums[$pair]['quoteAsset'];
-  $set_coin['minNotional'] = $minimums[$pair]['minNotional'];
-  $set_coin['stepSize']    = $minimums[$pair]['stepSize'];
-  $set_coin['tickSize']    = $minimums[$pair]['tickSize'];  
-
   // Write new settings file: pair, status, baseAsset, quoteAsset, minNotional, stepSize, tickSize
-  $message  = $set_coin['symbol'] . "," . $set_coin['status'] . ",";
-  $message .= $set_coin['baseAsset'] . "," . $set_coin['quoteAsset'] .","; 
-  $message .= $set_coin['minNotional'] . "," . $set_coin['stepSize'] . "," . $set_coin['tickSize'];
+  $message  = $pair . "," . $minimums[$pair]['status'] . ",";
+  $message .= $minimums[$pair]['baseAsset'] . "," . $minimums[$pair]['quoteAsset'] .","; 
+  $message .= $minimums[$pair]['minNotional'] . "," . $minimums[$pair]['stepSize'] . "," . $minimums[$pair]['tickSize'];
   file_put_contents($log_settings, $message);
 
   // Report
   echo "<b>Settings file</b><br />";
-  echo "Symbol         : " . $set_coin['symbol'] . "<br />";
-  echo "Status         : " . $set_coin['status'] . "<br />";
-  echo "baseAsset      : " . $set_coin['baseAsset'] . "<br />";
-  echo "quoteAsset     : " . $set_coin['quoteAsset'] . "<br />";
-  echo "minNotional    : " . $set_coin['minNotional'] . "<br />";
-  echo "stepSize       : " . $set_coin['stepSize'] . "<br />";
-  echo "tickSize       : " . $set_coin['tickSize'] . "<br /><br />";
-
-  // Determine minimum quote quantity to meet Binance minimum order value
-  $set_coin_temp = minimumQuote();
-  $set_coin['priceBUSD']   = $set_coin_temp['priceBUSD'];             // Price of base in BUSD
-  $set_coin['balance']     = $set_coin_temp['balance'];               // Balance in base
-  $set_coin['balanceBUSD'] = $set_coin_temp['balanceBUSD'];           // Balance in BUSD
-  $set_coin['minBUY']      = $set_coin_temp['minBUY'];                // Minimum BUY order in base
-  $set_coin['minBUYBUSD']  = $set_coin_temp['minBUYBUSD'];            // Minimum BUY order in BUSD
-   
+  echo "Symbol         : " . $pair . "<br />";
+  echo "Status         : " . $minimums[$pair]['status'] . "<br />";
+  echo "baseAsset      : " . $minimums[$pair]['baseAsset'] . "<br />";
+  echo "quoteAsset     : " . $minimums[$pair]['quoteAsset'] . "<br />";
+  echo "minNotional    : " . $minimums[$pair]['minNotional'] . "<br />";
+  echo "stepSize       : " . $minimums[$pair]['stepSize'] . "<br />";
+  echo "tickSize       : " . $minimums[$pair]['tickSize'] . "<br /><br />";
+    
   // Check if we can continue
-  if ($set_coin['status'] <> "TRADING") {
+  if ($minimums[$pair]['status'] <> "TRADING") {
     $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Pair not trading";
     echo $message;
     logCommand($message, "error");
     exit();
   }
-
-  // Check if we need more of coin
-  if ($set_coin['balanceBUSD'] < $set_coin['minBUYBUSD']) {
-    // Buying more
-    if (!$paper) {
-      echo "<i>Not enough balance to pay fees, buying at exchange...</i><br /><br />";
-      $order = $api->marketBuy($set_coin['symbol'], $set_coin['minBUY']);
-      logCommand($order, "binance");
-    } else {
-      echo "<i>Not enough balance to pay fees, skipping because PAPER trading...</i><br /><br />";
-    }
-  } 
   
   echo "<hr /><br />";
 } else {
