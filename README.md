@@ -96,6 +96,6 @@ Date, Pair, BUY / SELL, Base, Quote. In this file all open orders are stored, th
 
 **Format of $log_history**
 
-`2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,LIVE`
+`2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,0.012334, LIVE`
 
-Date, Pair, BUY / SELL, Base, Quote, Profit, LIVE / PAPER. The $log_history contains all actual BUY and SELLs trades for a certain pair.
+Date, Pair, BUY / SELL, Base, Quote, Profit, Commission, LIVE / PAPER. The $log_history contains all actual BUY and SELLs trades for a certain pair.
