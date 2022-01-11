@@ -76,26 +76,21 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 
 All logs reside in the 'data/' folder and are seperated per bot (usually you run a bot per pair so per pair). Also there is some special functionality that allows you to retreive a combined log of all bots. 
 
-- \*_log_history.csv  - History of all trades per coin
-- \*_log_trades.csv   - All active trades per coin (also known as bags)
-- \*_log_runs.csv     - Runtime log of executions per coin
-- \*_log_settings.csv	- Binance settings per coin
-- \*_log_binance.csv  - Log of all Binance responses per coin
-- \*_log_errors.csv   - Log of all errors per coin
+- \*_log_binance.txt  - Log of all Binance responses per coin (verbose logging without structure)
+- \*_log_errors.csv   - Log of all errors per coin (Date, Bot ID, Error message)
+- \*_log_fees.csv     - Log of all acquired BNB for paying fees\* (Date, Bot ID, (Binance) Order ID, Pair, BUY, Quote (BNB), Base)
+- \*_log_history.csv  - History of all trades per coin (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
+- \*_log_runs.csv     - Runtime log of executions per coin (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
+- \*_log_settings.csv	- Binance settings per coin (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
+- \*_log_trades.csv   - All active trades per coin (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
+
+\* Acquired BNB is registered per coin but is used for all trades, coins and pair.
+
+\** Profit includes the commission paid, it is true profit.
 
 http://foo.com/path/log_combine.php?files=history|trades|errors displays in the browser and creates files below which can be used in for Google Sheets.
+
 - log_history.csv     - History of all trades for all coins
 - log_trades.csv      - All active trades for all coins
+- log_fees.csv        - Total of all BNB acquired for paying fees
 - log_errors.csv      - Log of all errors for all coins
-
-**Format $log_trades**
-
-`2021-12-05 13:09:56,MATICBUSD,BUY,10,2.193000`
-
-Date, Pair, BUY / SELL, Base, Quote. In this file all open orders are stored, this is your bag of unsold orders.
-
-**Format of $log_history**
-
-`2021-12-05 13:16:10,MATICBUSD,SELL,10,2.21322,0.41322,0.012334, LIVE`
-
-Date, Pair, BUY / SELL, Base, Quote, Profit, Commission, LIVE / PAPER. Profit includes the commission paid, it is true profit. The $log_history contains all actual BUY and SELLs trades for a certain pair.
