@@ -74,21 +74,22 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 
 **Logfiles and analyses**
 
-All logs reside in the 'data/' folder and are seperated per bot (usually you run a bot per pair so per pair). Also there is some special functionality that allows you to retreive a combined log of all bots. 
+All logs reside in the 'data/' folder and are seperated per Bot ID (usually you run a bot per pair so per pair). Also there is some special functionality that allows you to retreive a combined log of all bots. 
 
-- \*_log_binance.txt  - Log of all Binance responses per coin (verbose logging without structure)
-- \*_log_errors.csv   - Log of all errors per coin (Date, Bot ID, Error message)
+- \*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
+- \*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
 - \*_log_fees.csv     - Log of all acquired BNB for paying fees\* (Date, Bot ID, (Binance) Order ID, Pair, BUY, Quote (BNB), Base)
-- \*_log_history.csv  - History of all trades per coin (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
-- \*_log_runs.csv     - Runtime log of executions per coin (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
-- \*_log_settings.csv	- Binance settings per coin (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
-- \*_log_trades.csv   - All active trades per coin (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
+- \*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
+- \*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
+- \*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
+- \*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
 
 \* Acquired BNB is registered per coin but is used for all trades, coins and pair.
 
 \** Profit includes the commission paid, it is true profit.
 
-http://foo.com/path/log_combine.php?files=history|trades|errors displays in the browser and creates files below which can be used in for Google Sheets.
+You can also combine the log files of all Bot IDs by using the log combiner:
+http://foo.com/path/log_combine.php?files=history|trades|errors displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
 
 - log_history.csv     - History of all trades for all coins
 - log_trades.csv      - All active trades for all coins
