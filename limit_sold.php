@@ -80,7 +80,7 @@ while (($line = fgetcsv($handle)) !== false) {
   
       // Add SELL order to $log_history and $log_runs
       $message = date("Y-m-d H:i:s") . "," . $id . "," . $limit_order['pair'] . ",SELL," . $limit_order['quantity'] . "," . $limit_order['quote'] . "\n";
-      $history = date("Y-m-d H:i:s") . "," . $line[1] . "," . $limit_order['order'] . "," . $limit_order['pair'] . ",SELL," . $limit_order['quantity'] . "," . $limit_order['quote'] . "," . $limit_order['profit'] . $limit_order['commission'] . ",LIVE\n";
+      $history = date("Y-m-d H:i:s") . "," . $line[1] . "," . $limit_order['order'] . "," . $limit_order['pair'] . ",SELL," . $limit_order['quantity'] . "," . $limit_order['quote'] . "," . $limit_order['profit'] . "," . $limit_order['commission'] . ",LIVE\n";
       logCommand($history, "history");
       logCommand($message, "run");
       
