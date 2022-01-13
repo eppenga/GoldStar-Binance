@@ -76,13 +76,13 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 
 All logs reside in the 'data/' folder and are seperated per Bot ID (usually you run a bot per pair so per pair). Also there is some special functionality that allows you to retreive a combined log of all bots. 
 
-- \*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
-- \*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
-- \*_log_fees.csv     - Log of all acquired BNB for paying fees\* (Date, Bot ID, (Binance) Order ID, Pair, BUY, Quote (BNB), Base)
-- \*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
-- \*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
-- \*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
-- \*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
+- *bot_id*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
+- *bot_id*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
+- *bot_id*_log_fees.csv     - Log of all acquired BNB for paying fees\* (Date, Bot ID, (Binance) Order ID, Pair, BUY, Quote (BNB), Base)
+- *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
+- *bot_id*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
+- *bot_id*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
+- *bot_id*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
 
 \* Acquired BNB is registered per coin but is used for all trades, coins and pair.
 
