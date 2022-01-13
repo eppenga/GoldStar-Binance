@@ -44,7 +44,7 @@ if (!file_exists($data)) {echo "Error: No data folder!"; exit();}
 // Get file list
 $files = scandir($data);
 
-// Filter all log files
+// Filter all *_log_history|trades|errors.csv files
 foreach ($files as &$file) {
   if (strpos($file, "_" . $logfiles) !== false) {
     $csvfiles[] = $file;
@@ -54,7 +54,7 @@ foreach ($files as &$file) {
 // Throw an error if no CSV files are found
 if (empty($csvfiles)) {echo "Error: No CSV files found!"; exit();}
 
-// Output log files to stdout and file
+// Output *_log_history.csv files to stdout and file
 foreach ($csvfiles as &$csvfile) {
   $combined .= file_get_contents($data . $csvfile);
 }

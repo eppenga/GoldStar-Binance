@@ -7,9 +7,13 @@
 *.backup
 *2.php
 *3.php
+*4.php
 config.php
+config_cycle.php
+cycle.php
 test*.php
 todo.txt
+tradingview.php
 /data
 
 # Ignore jaggedsoft/php-binance-api

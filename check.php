@@ -60,7 +60,7 @@ echo '<!DOCTYPE HTML>
 <body>';
 
 echo "<pre>";
-echo "<h2>Goldstar Bot Checker</h2>";
+echo "<h2>Goldstar Bot Check</h2>";
 echo "Date: " . date("Y-m-d H:i:s") . "<br />";
 
 // Get file list
