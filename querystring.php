@@ -109,4 +109,17 @@ if (isset($_GET["comp"])) {
   $compounding = $_GET["comp"];
 }
 
+// Get multiplier
+if (isset($_GET["mult"])) {
+  $temp_mult = $_GET["mult"];
+  if ($temp_mult > 1) {
+    $multiplier = $temp_mult;
+  } else {
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Order value multiplier must be larger than 1";
+    echo $message;
+    logCommand($message, "error");
+    exit();
+  }
+}
+
 ?>

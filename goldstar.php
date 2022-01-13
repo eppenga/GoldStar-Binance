@@ -42,8 +42,9 @@ if (isset($_GET["id"])) {
   $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
   $log_history    = "data/" . $id . "_log_history.csv";     // History
   $log_fees       = "data/" . $id . "_log_fees.csv";        // Fees
+  $log_profit     = "data/" . $id . "_log_profit.csv";      // Profit
   $log_runs       = "data/" . $id . "_log_runs.csv";        // Executing log
-  $log_binance    = "data/" . $id . "_log_binance.csv";     // Responses from Binance
+  $log_binance    = "data/" . $id . "_log_binance.txt";     // Responses from Binance
   $log_settings   = "data/" . $id . "_log_settings.csv";    // Binance settings
   $log_errors     = "data/" . $id . "_log_errors.csv";      // Errors
 } else {
@@ -94,12 +95,22 @@ if (!file_exists("data/"))      {mkdir("data/");}
 if (!file_exists($log_trades))  {file_put_contents($log_trades, "");}
 if (!file_exists($log_runs))    {file_put_contents($log_runs, "");}
 if (!file_exists($log_fees))    {file_put_contents($log_fees, "");}
+if (!file_exists($log_profit))  {file_put_contents($log_profit, "");}
 if (!file_exists($log_history)) {file_put_contents($log_history, "");}
 if (!file_exists($log_binance)) {file_put_contents($log_binance, "");}
 if (!file_exists($log_errors))  {file_put_contents($log_errors, "");}
 
 
 /*** START PROGRAM ***/
+
+/** Get price of pair **/
+$price = $api->price($pair);
+
+/** Check if we have enough to pay fees and get important variables **/
+include "checkbase.php";
+
+/** Get all important variables **/
+$set_coin = minimumQuote();
 
 // Report
 echo '<!DOCTYPE HTML>
@@ -112,26 +123,19 @@ echo '<!DOCTYPE HTML>
 <body>';
 
 echo "<pre>";
-echo "<h2>Goldstar Bot@" . date("Y-m-d H:i:s") . "</h2>";
+echo "<h2>Goldstar Bot</h2>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
 
+echo "Date       : " . date("Y-m-d H:i:s") . "<br />";
 echo "Bot ID     : " . $id . "<br />";
 echo "Pair       : " . $pair . "<br />";
 echo "Spread     : " . $spread . "%<br />";
 echo "Markup     : " . $markup . "%<br />";
-if (!empty($compounding)) {echo "Compounding: ACTIVE<br />";}
+echo "Multiplier : " . $multiplier . "x<br />";
+echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
 echo "Command    : " . $action;
 if ($limit) {echo " / LIMIT";}
 echo " (" . $tradetype . ")<br /><br /><hr /><br />";
-
-/** Get price of pair **/
-$price = $api->price($pair);
-
-/** Check if we have enough to pay fees and get important variables **/
-include "checkbase.php";
-
-/** Get all important variables **/
-$set_coin = minimumQuote();
 
 /** Check if we need more BNB for paying fees **/ 
 if (!$paper) {
@@ -259,7 +263,7 @@ if ($action == "BUY") {
     if (!isset($unique_id)) {$unique_id = uniqid();}
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
     logCommand($message, "buy");
-    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . ",0," . (-1 * $commission) . $tradetype;
+    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . ",0," . (-1 * $commission) . "," . $tradetype;
     logCommand($message, "history");
 
   } else {
@@ -300,15 +304,15 @@ if ($action == "SELL") {
       echo "Quantity   : " . $quantity . "<br />";
       echo "BUY Price  : " . $buy_price . "<br />";
       echo "BUY Total  : " . $buy . "<br />";
-      echo "Commission : " . $buy_fee . " (" . $fee . "%)<br /><br />";
+      echo "Commission : " . $buy_fee . "<br /><br />";
 
       // Report basic information
       echo "<i>SELL</i>" . "<br />";
       echo "Quantity   : " . $quantity . "<br />";
       echo "SELL Price : " . $price . "<br />";
       echo "SELL Total : " . $sell . "<br />";
-      echo "Markup     : " . $markups . " (" . $markup . "%)<br />";
-      echo "Commission : " . $sell_fee . " (" . $fee . "%)<br />";        
+      echo "Markup     : " . $markups . "<br />";
+      echo "Commission : " . $sell_fee . "<br />";        
       echo "Profit     : " . $profit . "<br /><br />";
 
       // We can SELL with profit!!

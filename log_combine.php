@@ -27,7 +27,9 @@ if (isset($_GET["files"])) {
   } elseif ($_GET["files"] == "errors") {
     $logfiles = "log_errors.csv";
   } elseif ($_GET["files"] == "fees") {
-    $logfiles = "log_errors.csv";
+    $logfiles = "log_fees.csv";
+  } elseif ($_GET["files"] == "profits") {
+    $logfiles = "log_profit.csv";
   } else {
     echo "Error: Undefined what combined log to create!";
     exit();
@@ -42,7 +44,7 @@ if (!file_exists($data)) {echo "Error: No data folder!"; exit();}
 // Get file list
 $files = scandir($data);
 
-// Filter all *_log_history|trades|errors.csv files
+// Filter all log files
 foreach ($files as &$file) {
   if (strpos($file, "_" . $logfiles) !== false) {
     $csvfiles[] = $file;
@@ -52,7 +54,7 @@ foreach ($files as &$file) {
 // Throw an error if no CSV files are found
 if (empty($csvfiles)) {echo "Error: No CSV files found!"; exit();}
 
-// Output *_log_history.csv files to stdout and file
+// Output log files to stdout and file
 foreach ($csvfiles as &$csvfile) {
   $combined .= file_get_contents($data . $csvfile);
 }

@@ -102,7 +102,7 @@ function extractBinance($order) {
 function minimumQuote() {
 
   // Declare some variables as global
-  global $api, $binanceMinimum, $log_settings, $compounding;
+  global $api, $binanceMinimum, $log_settings, $compounding, $multiplier;
 
   // Get settings
   if (file_exists($log_settings)) {
@@ -161,11 +161,13 @@ function minimumQuote() {
   $set_coin['minBUYBUSD'] = $binanceMinimum * 1.1;  
 
   // Correct for compounding only when compounding is set and in profit (> 1)
+  $set_coin['compFactor'] = 0;
   if (!empty($compounding)) {
     if (($TbalanceBUSD / $comp_BUSD) > 1) {
       $set_coin['minBUY']     = $set_coin['minBUY'] * ($TbalanceBUSD / $comp_BUSD);
       $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * ($TbalanceBUSD / $comp_BUSD);
-      /*
+      $set_coin['compFactor'] = $TbalanceBUSD / $comp_BUSD;
+      /*      
       echo "<i>Compounding multiplier active at x" . ($TbalanceBUSD / $comp_BUSD) . "</i><br /><br /><hr /><br />";
       echo "Total Balance BUSD: " . $TbalanceBTC . "<br>";
       echo "Compound in BUSD: " . $comp_BUSD . "<br>";
@@ -174,6 +176,11 @@ function minimumQuote() {
       */      
     }
   }
+  
+  // Correct for multiplier
+  $set_coin['multiplier'] = $multiplier;
+  $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplier;
+  $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplier;
   
   // Fix Binance stepSize precission error
   $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
@@ -206,6 +213,8 @@ function minimumQuote() {
   $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
   $minQuote['balanceBNB']   = $set_coin['balanceBNB'];     // Current amount of BNB for paying fees
   $minQuote['priceBNB']     = $set_coin['priceBNB'];       // Current price of BNB for paying fees 
+  $minQuote['compFactor']   = $set_coin['compFactor'];     // Compounding factor
+  $minQuote['multiplier']   = $set_coin['multiplier'];     // Order value multiplier
   
   return $minQuote;  
 }

@@ -60,23 +60,18 @@ echo '<!DOCTYPE HTML>
 <body>';
 
 echo "<pre>";
-echo "<h2>Goldstar Bot Checker@" . date("Y-m-d H:i:s") . "</h2>";
+echo "<h2>Goldstar Bot Checker</h2>";
+echo "Date: " . date("Y-m-d H:i:s") . "<br />";
 
 // Get file list
 $files = scandir($data);
 
 // Get all IDs
 foreach ($files as &$file) {
-  if (strpos($file, "_log_binance.csv") !== false) {
-    $ids[] = str_replace("_log_binance.csv", "", $file);
+  if (strpos($file, "_log_binance.txt") !== false) {
+    $ids[] = str_replace("_log_binance.txt", "", $file);
   }
 }
-
-echo "<b>Bots found</b><br />";
-foreach ($ids as &$id) {
-  echo $id . "<br />";
-}
-echo "<br /><hr /><br />";
 
 // Check per bot if Binance LIMIT SELL orders are filled
 foreach ($ids as &$id) {
@@ -85,8 +80,9 @@ foreach ($ids as &$id) {
   $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
   $log_history    = "data/" . $id . "_log_history.csv";     // History
   $log_fees       = "data/" . $id . "_log_fees.csv";        // Fees
+  $log_profit     = "data/" . $id . "_log_profit.csv";      // Profit
   $log_runs       = "data/" . $id . "_log_runs.csv";        // Executing log
-  $log_binance    = "data/" . $id . "_log_binance.csv";     // Responses from Binance
+  $log_binance    = "data/" . $id . "_log_binance.txt";     // Responses from Binance
   $log_settings   = "data/" . $id . "_log_settings.csv";    // Binance settings
   $log_errors     = "data/" . $id . "_log_errors.csv";      // Errors
 
@@ -95,12 +91,10 @@ foreach ($ids as &$id) {
   $pair           = $settings[0];
 
   // Report
-  echo "<b>Now checking '" . $id . "' for pair '" . $pair . "'</b><br /><br />";
+  echo "Now checking '" . $id . "' for pair '" . $pair . "'...<br />";
   
   // Check on Binance
   include("limit_sold.php");
-  echo "<hr /><br />";
-  
 }
 
 // End program
