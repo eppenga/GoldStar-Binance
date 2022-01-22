@@ -10,6 +10,13 @@
  * limit_sold.php
  * Checks if there are limit orders that are already sold.
  * 
+ * Dependancies:
+ * $action        - if equals CHECK than all Binance orders are checked for $pair
+ * $pair          - what pair to check
+ * $log_trades    - containing ID of log file
+ * 
+ * $silent        - output to stdout or not
+ * 
  */
 
 
@@ -20,7 +27,8 @@ if (rand(0, 10) == 5)   {$limit_check = true;}
 if ($action == "CHECK") {$limit_check = true;}
 
 // Loop through trades
-$handle = fopen($log_trades, "r");
+$unique_ids[] = [];
+$handle       = fopen($log_trades, "r");
 while (($line = fgetcsv($handle)) !== false) {
 
   if ($spread == 0) {$spread = 1;}
@@ -48,9 +56,6 @@ while (($line = fgetcsv($handle)) !== false) {
     // Found a FILLED limit order, let's process it as a sales order
     if (($orderstatus['status'] == "FILLED") && ($orderstatus['type'] == "LIMIT")) {
       
-      // Report
-      echo "<i>LIMIT order " . $orderstatus['order'] . " was filled!</i><br /><br />";
-      
       // Log Binance FILLED order
       logCommand($order, "binance");
       
@@ -63,20 +68,24 @@ while (($line = fgetcsv($handle)) !== false) {
       $limit_order['profit']     = $orderstatus['quote'] - $line[6] - $limit_order['commission'];
       $limit_order['price']      = $orderstatus['price'];
       
-      // Report orginal BUY and matching LIMIT (SELL) trade
-      echo "<b>Original BUY trade</b><br />";
-      echo "Date       : " . $line[0] . "<br />";
-      echo "Order ID   : " . $line[2] . "<br />";
-      echo "Quantity   : " . $line[5] . "<br />";
-      echo "BUY Price  : " . ($line[6] / $line[5]) . "<br />";
-      echo "BUY Total  : " . $line[6]  . "<br /><br />";
+      // Report
+      if (!$silent) {
+        echo "<i>LIMIT order " . $orderstatus['order'] . " was filled!</i><br /><br />";
   
-      echo "<b>Matching LIMIT trade</b><br />";
-      echo "Quantity   : " . $limit_order['quantity'] . "<br />";
-      echo "SELL Price : " . $limit_order['price'] . "<br />";
-      echo "SELL Total : " . $limit_order['quote'] . "<br />";
-      echo "Commission : " . $limit_order['commission'] . "<br />";
-      echo "Profit     : " . $limit_order['profit'] . "<br /><br />";        
+        echo "<b>Original BUY trade</b><br />";
+        echo "Date       : " . $line[0] . "<br />";
+        echo "Order ID   : " . $line[2] . "<br />";
+        echo "Quantity   : " . $line[5] . "<br />";
+        echo "BUY Price  : " . ($line[6] / $line[5]) . "<br />";
+        echo "BUY Total  : " . $line[6]  . "<br /><br />";
+    
+        echo "<b>Matching LIMIT trade</b><br />";
+        echo "Quantity   : " . $limit_order['quantity'] . "<br />";
+        echo "SELL Price : " . $limit_order['price'] . "<br />";
+        echo "SELL Total : " . $limit_order['quote'] . "<br />";
+        echo "Commission : " . $limit_order['commission'] . "<br />";
+        echo "Profit     : " . $limit_order['profit'] . "<br /><br />";
+      }
   
       // Add SELL order to $log_history and $log_runs
       $message = date("Y-m-d H:i:s") . "," . $id . "," . $limit_order['pair'] . ",SELL," . $limit_order['quantity'] . "," . $limit_order['quote'] . "\n";
@@ -86,6 +95,10 @@ while (($line = fgetcsv($handle)) !== false) {
       
       // Add to array of to be removed unique IDs
       $unique_ids[] = $unique_id;
+      
+      // Temp debug to check what orders are removed
+      $temp_message = date("Y-m-d H:i:s") . "," . $unique_id . ",Order to be removed";
+      file_put_contents("data/log_removed.csv", $temp_message, FILE_APPEND | LOCK_EX);
     }
   }
 }
@@ -102,6 +115,9 @@ if (!empty($unique_ids)) {
     foreach ($unique_ids as &$unique_id) {
       if ($line[2] == $unique_id) {
         $uid_skip = true;
+        // Temp debug to check what orders are removed
+        $temp_message = date("Y-m-d H:i:s") . "," . $line[1] . "," . $line[2] . "," . $line[3] . "," . $line[4] . "," . $line[5] . "," . $line[6] . "\n";
+        file_put_contents("data/log_removed.csv", $temp_message, FILE_APPEND | LOCK_EX);
       }
     }
     if (!$uid_skip) {

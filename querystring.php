@@ -38,16 +38,14 @@ if (empty($tradetype)) {
 if ($tradetype == "PAPER") {$paper = true;} else {$paper = false;}
 if ($paper) {$tradetype = "PAPER";} else {$tradetype = "LIVE";}
 
-// Get BUY, SELL or CHECK command 
+// Get BUY or SELL
 $command = strtoupper($_GET["action"]);
 if ($command == "BUY") {
   $action = "BUY";
 } elseif ($command == "SELL") {
   $action = "SELL";
-} elseif ($command == "CHECK") {
-  $action = "CHECK";
 } else {
-  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No BUY, SELL or CHECK";
+  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No BUY or SELL";
   echo $message;
   logCommand($message, "error");
   exit();

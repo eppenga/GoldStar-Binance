@@ -27,14 +27,18 @@ include "config.php";
 include "functions.php";
 
 // Set variables
-$id         = "profit.php";
-$data       = "data/";
-$bags       = 0;
-$base       = 0;
-$balance    = 0;
-$fees       = 0;
-$profit     = 0;
-$quote      = 0;
+$id          = "profit.php";
+$data        = "data/";
+$bags        = 0;
+$base        = 0;
+$balance     = 0;
+$fees        = 0;
+$profit      = 0;
+$quote       = 0;
+$base_buys   = 0;
+$base_sells  = 0;
+$quote_sells = 0;
+$quote_buys  = 0;
 
 // Filenames
 if (isset($_GET["id"])) {
@@ -78,7 +82,7 @@ if (!$check_analyze) {
   exit();
 }
 
-// Display on screen as CSV
+// How to display on screen FULL, SHORT or BATCH
 $csvDisplay = strtoupper($_GET["csv"]);
 
 /** Connect to Binance **/
@@ -161,10 +165,10 @@ $fees               = $buy_fees + $sell_fees;
 $total_profit       = $revenue - $fees;
 
 // Calculate profit per day
-$seconds            = strtotime($date_end) - strtotime($date_start);
+$seconds            = strtotime(date("Y-m-d H:i:s")) - strtotime($date_end);
 $day_profit         = 60 * 60 * 24 * ($total_profit / $seconds);
 
-if (($csvDisplay <> "FULL") && ($csvDisplay <> "SHORT")) {
+if (empty($csvDisplay)) {
   
   echo '<!DOCTYPE HTML>
   <html>
@@ -219,8 +223,7 @@ if (($csvDisplay <> "FULL") && ($csvDisplay <> "SHORT")) {
   echo "Revenue      : " . $revenue . " " . $quote_coin . "<br />";
   echo "Fees         : " . $fees . " " . $quote_coin . "<br />";
   echo "Daily profit : " . $day_profit . " " . $quote_coin . "<br />";
-  echo "Total profit : <b><a href=\"https://cryptowat.ch/charts/BINANCE:" . $base_coin . "-" . $quote_coin . "\" target=\"_blank\">";
-  echo $total_profit . " " . $quote_coin . "</a></b><br /><br />";
+  echo "Total profit : <b><u>" . $total_profit . " " . $quote_coin . "</u></b><br /><br />";
   
   // End program
   echo "<i>Ending program...</i><br />";
@@ -232,14 +235,16 @@ if (($csvDisplay <> "FULL") && ($csvDisplay <> "SHORT")) {
 
 // Write profit log file
 // Format: Date, Bot ID, Pair, Start date, End date, Bags, Balance, Revenue, Fees, Profit
-$message  = $date . "," . $id . "," .  $pair . "," . $date_start . "," . $date_end . ",";
-$message .= $bags . "," . $base_balance . "," . $revenue . "," . $fees . "," . $total_profit . "\n";
-file_put_contents($log_profit, $message);
+$message  = $date . "," . $id . "," .  $pair . "," . $date_start . "," . $date_end . "," . $profit . ",";
+$message .= $bags . "," . $base_balance . "," . $price  . "," . $revenue . "," . $fees . "," . $total_profit . "\n";
+file_put_contents($log_profit, $message, FILE_APPEND | LOCK_EX);
 
 if ($csvDisplay == "FULL") {
   echo $message;
 } elseif ($csvDisplay == "SHORT") {
   echo $total_profit;
+} elseif ($csvDisplay == "BATCH") {
+  echo "Checked profit for " . $pair;
 }
 
 ?>

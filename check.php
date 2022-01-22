@@ -22,6 +22,7 @@ if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!
 
 // Configuration
 include "config.php";
+include "config_cycle.php";
 
 /** Functions **/
 include "functions.php";
@@ -30,7 +31,7 @@ include "functions.php";
 $id         = "check.php";
 $data       = "data/";
 $action     = "CHECK";
-$log_errors = "data/log_errors.csv";            // Where to store the errors
+$log_errors = "data/log_errors.csv";
 
 /** Connect to Binance **/
 require 'vendor/autoload.php';
@@ -61,7 +62,7 @@ echo '<!DOCTYPE HTML>
 
 echo "<pre>";
 echo "<h2>Goldstar Bot Check</h2>";
-echo "Date: " . date("Y-m-d H:i:s") . "<br />";
+echo "Date: " . date("Y-m-d H:i:s") . "<br /><br />";
 
 // Get file list
 $files = scandir($data);
@@ -73,32 +74,39 @@ foreach ($files as &$file) {
   }
 }
 
-// Check per bot if Binance LIMIT SELL orders are filled
+// Create batch files that can check for filled orders and profits
+$message  = "";
+$counter = 0;
+
+$message = "@echo off
+E:
+cd \GoldStarAuto
+
+echo *** Checking for profits and filled orders ***
+echo Date: %date% / %time%
+echo:
+
+";
+
 foreach ($ids as &$id) {
-
-  // Set the filenames from the ID
-  $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
-  $log_history    = "data/" . $id . "_log_history.csv";     // History
-  $log_fees       = "data/" . $id . "_log_fees.csv";        // Fees
-  $log_profit     = "data/" . $id . "_log_profit.csv";      // Profit
-  $log_runs       = "data/" . $id . "_log_runs.csv";        // Executing log
-  $log_binance    = "data/" . $id . "_log_binance.txt";     // Responses from Binance
-  $log_settings   = "data/" . $id . "_log_settings.csv";    // Binance settings
-  $log_errors     = "data/" . $id . "_log_errors.csv";      // Errors
-
-  // Find the correct pair
-  $settings       = explode(",", file_get_contents($log_settings));
-  $pair           = $settings[0];
-
-  // Report
-  echo "Now checking '" . $id . "' for pair '" . $pair . "'...<br />";
-  
-  // Check on Binance
-  include("limit_sold.php");
+  $message .= "echo Now checking " . $id . "...\n";
+  $message .= "E:\Lynx\lynx \"http://domotica.eppenga.com/goldstarauto/filled.php?csv=batch&key=" . $url_key . "&id=" . $id . "\" -dump\n";
+  $message .= "E:\Lynx\lynx \"http://domotica.eppenga.com/goldstarauto/profit.php?csv=batch&key=" . $url_key . "&id=" . $id . "\" -dump\n";
+  $message .= "echo:\n\n";
 }
 
+$message .= "exit\n";
+
+/*
+echo "<b>Batch file</b><br />";
+echo $message;
+*/
+
+// Write new batch files
+file_put_contents($folder . $checker, $message);
+
 // End program
-echo "<i>Ending program...</i><br />";
+echo "<i>Batch file created, ending program...</i><br />";
 echo "</pre>
 
 </body>

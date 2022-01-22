@@ -36,7 +36,7 @@ $binanceMinimum = 10;
 // Recalculate pair setting every x seconds
 $repeatrun = 24 * 60 * 60;
 
-// Filenames
+// Get logfiles based on Bot ID
 if (isset($_GET["id"])) {
   $id             = $_GET["id"];
   $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
@@ -51,7 +51,7 @@ if (isset($_GET["id"])) {
   $message = date("Y-m-d H:i:s") . ",Error: ID not set\n";
   echo $message;
   if (!file_exists("data/")) {mkdir("data/");}
-  file_put_contents("data/log_errors.csv", $message, FILE_APPEND | LOCK_EX);  
+  file_put_contents("data/log_errors.csv", $message, FILE_APPEND | LOCK_EX);
   exit();
 }
 
@@ -79,6 +79,7 @@ $pair           = "";
 $trades         = "";
 $limit          = false;
 $paper          = true;
+$silent         = false;
 
 /** Functions **/
 include "functions.php";
@@ -103,16 +104,7 @@ if (!file_exists($log_errors))  {file_put_contents($log_errors, "");}
 
 /*** START PROGRAM ***/
 
-/** Get price of pair **/
-$price = $api->price($pair);
-
-/** Check if we have enough to pay fees and get important variables **/
-include "checkbase.php";
-
-/** Get all important variables **/
-$set_coin = minimumQuote();
-
-// Report
+// Start GUI
 echo '<!DOCTYPE HTML>
 <html>
 <head>
@@ -126,6 +118,16 @@ echo "<pre>";
 echo "<h2>Goldstar Bot</h2>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
 
+/** Get price of pair **/
+$price = $api->price($pair);
+
+/** Check if we have enough to pay fees and get important variables **/
+include "checkbase.php";
+
+/** Get all important variables **/
+$set_coin = minimumQuote();
+
+// Report
 echo "Date       : " . date("Y-m-d H:i:s") . "<br />";
 echo "Bot ID     : " . $id . "<br />";
 echo "Pair       : " . $pair . "<br />";
@@ -133,6 +135,10 @@ echo "Spread     : " . $spread . "%<br />";
 echo "Markup     : " . $markup . "%<br />";
 echo "Multiplier : " . $multiplier . "x<br />";
 echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
+if (isset($set_coin['multiplierTV'])) {
+  echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";
+}
+echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Command    : " . $action;
 if ($limit) {echo " / LIMIT";}
 echo " (" . $tradetype . ")<br /><br /><hr /><br />";
@@ -159,11 +165,6 @@ if (!$paper) {
     $message = date("Y-m-d H:i:s") . "," . $id . "," . extractBinance($order)['order'] . "," . "BNB" . $set_coin['quoteAsset'] . "," . extractBinance($order)['base'] . "," . extractBinance($order)['quote'];
     logCommand($message, "fee");
   }
-}
-
-/*** CHECK action ***/
-if ($action == "CHECK") {
-  include("limit_sold.php");
 }
 
 

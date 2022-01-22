@@ -81,15 +81,15 @@ function extractBinance($order) {
   }
   
   $transaction = [
-    'symbol' => $order['symbol'],
-    'order' => $order['orderId'],
-    'time' => $order['transactTime'],
-    'status' => $order['status'],
-    'type' =>  $order['type'],
-    'side' =>  $order['side'],    
-    'price' => $price,
-    'base' => $base,
-    'quote' => $quote,
+    'symbol'     => $order['symbol'],
+    'order'      => $order['orderId'],
+    'time'       => $order['transactTime'],
+    'status'     => $order['status'],
+    'type'       => $order['type'],
+    'side'       => $order['side'],    
+    'price'      => $price,
+    'base'       => $base,
+    'quote'      => $quote,
     'commission' => $commission
   ]; 
   
@@ -131,21 +131,21 @@ function minimumQuote() {
   $set_coin['balanceQuote'] = $balanceQuote;
 
   // Get balance and price of BNB
-  $balanceBNB   = $balances['BNB']['available'];
-  $priceBNB     = $api->price("BNB" . $set_coin['quoteAsset']);  
-  $set_coin['balanceBNB']   = $balanceBNB;
-  $set_coin['priceBNB']     = $priceBNB;
+  $balanceBNB = $balances['BNB']['available'];
+  $priceBNB   = $api->price("BNB" . $set_coin['quoteAsset']);  
+  $set_coin['balanceBNB'] = $balanceBNB;
+  $set_coin['priceBNB']   = $priceBNB;
 
   // Calculate total Binance balance and compouding in BUSD (only necessary when compounding)
   if (!empty($compounding)) {
-    $TbalanceBTC  = $api->btc_total;
-    $btc_price    = $api->price("BTCBUSD");
+    $TbalanceBTC = $api->btc_total;
+    $btc_price   = $api->price("BTCBUSD");
     $TbalanceBUSD = $TbalanceBTC * $btc_price;  
     if ($set_coin['quoteAsset'] <> 'BUSD') {
-      $comp_pair  = $set_coin['baseAsset'] . 'BUSD';
-      $comp_BUSD  = $api->price($comp_pair);
+      $comp_pair = $set_coin['baseAsset'] . 'BUSD';
+      $comp_BUSD = $api->price($comp_pair);
     } else {
-      $comp_BUSD  = $compounding;
+      $comp_BUSD = $compounding;
     }    
   }
   
@@ -161,19 +161,12 @@ function minimumQuote() {
   $set_coin['minBUYBUSD'] = $binanceMinimum * 1.1;  
 
   // Correct for compounding only when compounding is set and in profit (> 1)
-  $set_coin['compFactor'] = 0;
+  $set_coin['compFactor'] = 1;
   if (!empty($compounding)) {
     if (($TbalanceBUSD / $comp_BUSD) > 1) {
       $set_coin['minBUY']     = $set_coin['minBUY'] * ($TbalanceBUSD / $comp_BUSD);
       $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * ($TbalanceBUSD / $comp_BUSD);
       $set_coin['compFactor'] = $TbalanceBUSD / $comp_BUSD;
-      /*      
-      echo "<i>Compounding multiplier active at x" . ($TbalanceBUSD / $comp_BUSD) . "</i><br /><br /><hr /><br />";
-      echo "Total Balance BUSD: " . $TbalanceBTC . "<br>";
-      echo "Compound in BUSD: " . $comp_BUSD . "<br>";
-      echo "minBUY: " . $set_coin['minBUY'] . "<br>";
-      echo "minBUYBUSD: " . $set_coin['minBUYBUSD'] . "<br>";
-      */      
     }
   }
   
@@ -182,6 +175,35 @@ function minimumQuote() {
   $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplier;
   $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplier;
   
+  // Correct for number of bots (TradingView integration)
+  $multiplierTV    = 0;
+  $log_tradingview = "data/log_tradingview.csv";
+  if (file_exists($log_tradingview)) {
+    
+    // Find last line in file
+    $handle = fopen($log_tradingview, "r");
+    while (($line = fgetcsv($handle)) !== false) {
+      
+      $bots_requested = $line[1];
+      $bots_received  = $line[2];
+    }
+    fclose($handle);
+    
+    // Cap to a maximum of 250%
+    if (($bots_requested / $bots_received) > 2.5) {
+      $multiplierTV = 2.5;
+    } elseif (($bots_requested / $bots_received) < 1) {
+      $multiplierTV = 1;     
+    } else {
+      $multiplierTV = $bots_requested / $bots_received;
+    }
+    $set_coin['multiplierTV'] = $multiplierTV;
+  
+    // Adjust minimum order value
+    $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplierTV;
+    $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplierTV;
+  }
+
   // Fix Binance stepSize precission error
   $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
 
@@ -215,6 +237,7 @@ function minimumQuote() {
   $minQuote['priceBNB']     = $set_coin['priceBNB'];       // Current price of BNB for paying fees 
   $minQuote['compFactor']   = $set_coin['compFactor'];     // Compounding factor
   $minQuote['multiplier']   = $set_coin['multiplier'];     // Order value multiplier
+  $minQuote['multiplierTV'] = $set_coin['multiplierTV'];   // Order value multiplier for TradingView integration
   
   return $minQuote;  
 }
