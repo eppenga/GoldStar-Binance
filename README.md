@@ -97,6 +97,7 @@ http://foo.com/path/log_combine.php?files=history|trades|errors displays in the 
 - log_errors.csv      - Log of all errors for all coins
 
 **Helper files**
+
 Helper files are meant to make to administrative work as easy as possible.
 
 - filled.php?key=12345&id=a1   - Checks if there are filled orders on Binance when used as gridbot
