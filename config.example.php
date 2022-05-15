@@ -16,6 +16,9 @@
  * $compounding    - Start amount of Binance account in base currency,
 										 0 disables this function (adviced).
  * $bnb						 - Amount of BNB to purchase for paying Binance fees
+ * $tv_advice      - Use TradingView recommendation
+ * $tv_period      - Period for TradingView recommendation
+ * $tv_recommend   - Recommendation to follow of TradingView
  * $binance_key    - Binance API key
  * $binance_secret - Binance API secret
  * $url_key        - Add to your webhook to prevent unwanted execution
@@ -30,6 +33,11 @@ $spread         = 0.75;
 $multiplier     = 1.00;
 $compounding    = 0;
 $bnb            = 0.10;
+
+// TradingView
+$tv_advice      = false;
+$tv_period      = 60;
+$tv_recommend   = array("BUY", "STRONG_BUY");
 
 // Binance keys
 $binance_key    = "1234567890";

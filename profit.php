@@ -218,12 +218,11 @@ if (empty($csvDisplay)) {
   
   echo "<b>Mains</b><br />";
   echo "Bags         : " . $bags . " Open orders<br />";
-  //echo "Trades       : " . $total_orders . " Filled orders<br />";
+  echo "Trades       : " . $total_orders . " Filled orders<br />";
   echo "Balance      : " . $quote_balance . " " . $quote_coin . "<br />";
   echo "Revenue      : " . $revenue . " " . $quote_coin . "<br />";
   echo "Fees         : " . $fees . " " . $quote_coin . "<br />";
-  echo "Daily profit : " . $day_profit . " " . $quote_coin . "<br />";
-  echo "Total profit : <b><u>" . $total_profit . " " . $quote_coin . "</u></b><br /><br />";
+  echo "Profit       : <b><u>" . $total_profit . " " . $quote_coin . "</u></b><br /><br />";
   
   // End program
   echo "<i>Ending program...</i><br />";

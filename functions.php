@@ -129,10 +129,11 @@ function minimumQuote() {
   $balanceQuote = $balances[$set_coin['quoteAsset']]['available'];
   $set_coin['balance']      = $balance;
   $set_coin['balanceQuote'] = $balanceQuote;
+  $set_coin['onOrder']      = $balances[$set_coin['baseAsset']]['onOrder'];
 
   // Get balance and price of BNB
   $balanceBNB = $balances['BNB']['available'];
-  $priceBNB   = $api->price("BNB" . $set_coin['quoteAsset']);  
+  $priceBNB   = $api->price("BNB" . $set_coin['quoteAsset']);
   $set_coin['balanceBNB'] = $balanceBNB;
   $set_coin['priceBNB']   = $priceBNB;
 
@@ -155,6 +156,7 @@ function minimumQuote() {
 
   // Get balance and price of the coin in BUSD
   $set_coin['balanceBUSD'] = $set_coin['balance'] * $set_coin['priceBUSD'];
+  $set_coin['onOrderBUSD'] = $set_coin['onOrder'] * $set_coin['priceBUSD'];
   
   // Check if notional is below the 10 BUSD (+10% to prevent issues) Binance threshold
   $set_coin['minBUY']     = ($binanceMinimum * 1.1) / $set_coin['priceBUSD'];
@@ -231,6 +233,8 @@ function minimumQuote() {
   $minQuote['balance']      = $set_coin['balance'];        // How much of the base asset is available on Binance
   $minQuote['balanceBUSD']  = $set_coin['balanceBUSD'];    // The above only then expressed in BUSD
   $minQuote['balanceQuote'] = $set_coin['balanceQuote'];   // How much of the quote asset is available on Binance  
+  $minQuote['onOrder']      = $set_coin['onOrder'];        // How much of the base asset is onOrder
+  $minQuote['onOrderBUSD']  = $set_coin['onOrderBUSD'];    // How much of the base asset is onOrder in BUSD  
   $minQuote['minBUY']       = $set_coin['minBUY'];         // Minimum BUY value in base (possibly corrected for compounding!)
   $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
   $minQuote['balanceBNB']   = $set_coin['balanceBNB'];     // Current amount of BNB for paying fees
@@ -250,6 +254,57 @@ function roundStep($value, $stepSize = 0.1) {
   $value = round($value, $precision);
   
   return $value;
+}
+
+/** Get TradingView recommendation **/
+// $period = 1m: 1, 5m: 5, 15m: 15, 30m: 30, 1h: 60, 2h: 120, 4h: 240, 1W: 1W, 1M: 1M, 1d: leave emtpy (default)
+function getTradingView($symbol, $period) {
+	
+	// Retrieve from TradingView
+	$curl = curl_init();
+  $postField = '{"symbols":{"tickers":["BINANCE:' . $symbol . '"],"query":{"types":[]}},"columns":["Recommend.All|' . $period . '"]}';
+  curl_setopt_array($curl, array(
+  	CURLOPT_URL => "https://scanner.tradingview.com/crypto/scan",
+  	CURLOPT_RETURNTRANSFER => true,
+  	CURLOPT_CUSTOMREQUEST => "POST",
+  	CURLOPT_POSTFIELDS => $postField,
+  	CURLOPT_HTTPHEADER => array(
+  		"accept: */*",
+  		"accept-language: en-GB,en-US;q=0.9,en;q=0.8",
+  		"cache-control: no-cache",
+  		"content-type: application/x-www-form-urlencoded",
+  		"origin: https://www.tradingview.com",
+  		"referer: https://www.tradingview.com/",
+  		"user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
+  	)
+	));
+
+  // Store result
+  try {
+    $result = curl_exec($curl);
+    if (isset($result) && !empty($result)) {
+  	    $j = json_decode($result, true);
+  		if (isset($j['data'][0]['d'][0])) {
+  			$j = $j['data'][0]['d'][0];
+  		}
+    }
+	} catch (Exception $e) { echo "Error: " . $e; }
+	
+  // Set recommendation
+  $recommendation = "ERROR";
+  if (($j >= -1) && ($j < -0.5)) {
+    $recommendation = "STRONG_SELL";
+  } elseif (($j >= -0.5) && ($j < -0.1)) {
+    $recommendation = "SELL";
+  } elseif (($j >= -0.1) && ($j <= 0.1)) {
+    $recommendation = "NEUTRAL";
+  } elseif (($j > 0.1)   && ($j <= 0.5)) {
+    $recommendation = "BUY";
+  } elseif (($j > 0.5)   && ($j <= 1.0)) {
+    $recommendation = "STRONG_BUY";
+  }
+
+  return $recommendation;
 }
 
 ?>

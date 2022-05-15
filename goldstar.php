@@ -138,6 +138,10 @@ echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
 if (isset($set_coin['multiplierTV'])) {
   echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";
 }
+if ($tv_advice) {
+  echo "TradingView: " . str_replace("_", " ", implode(", ", $tv_recommend)) . " (" . $tv_period . ")<br />";
+}
+echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Command    : " . $action;
 if ($limit) {echo " / LIMIT";}
@@ -170,7 +174,7 @@ if (!$paper) {
 
 /*** BUY action ***/
 if ($action == "BUY") {
-  echo "<i>Trying to BUY...</i><br /><br /><hr /><br />";
+  echo "<i>Trying to buy " . $set_coin['minBUY'] . " " . $set_coin['baseAsset'] . " at " . $price ." " . $set_coin['quoteAsset'] . "...</i><br /><br /><hr /><br />";
   if ($debug) {$price = $debug_buy;}
 
   // Check if there are sold LIMIT orders
@@ -187,9 +191,19 @@ if ($action == "BUY") {
     $buy_price = $line[6] / $line[5];
     if (($buy_price >= $price_min) && ($buy_price <= $price_max)) {
       $nobuy = true;
+      echo "<i>Skipping buy because existing trade within " . abs(round((($price / $buy_price) - 1) * 100, 2)) . "%...</i><br /><br /><hr /><br />";
     }    
   }
   fclose($handle);
+
+  // Check for TradingView advice
+  if (($tv_advice) && (!$nobuy)) {
+    $tv_advice_given = getTradingView($pair, $tv_period);
+    if (!in_array($tv_advice_given, $tv_recommend)) {
+      $nobuy = true;
+      echo "<i>Not recommended by TradingView (". str_replace("_", " ", $tv_advice_given) . "), skipping...</i><br /><br /><hr /><br />";      
+    }
+  }
    
   // We can buy if spread = 0 or there is no adjacent order
   if ((!$nobuy) || ($spread == 0)) {
@@ -246,7 +260,7 @@ if ($action == "BUY") {
       echo "<b>LIVE BUY Trade</b><br />";
       echo "Quantity   : " . $quantity . "<br />";
       echo "BUY Price  : " . $price . "<br />";   
-      echo "BUY Total  : " . $buy  . "<br />";
+      echo "BUY Total  : " . $buy . "<br />";
       echo "Commission : " . $commission . " (" . $fee . "%)<br /><br />";      
       echo "Symbol     : " . $order['symbol'] . "<br />";
       echo "Order ID   : " . $order['orderId'] . "<br />";
@@ -267,8 +281,6 @@ if ($action == "BUY") {
     $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . ",0," . (-1 * $commission) . "," . $tradetype;
     logCommand($message, "history");
 
-  } else {
-    echo "<i>Price in range of existing buy order, skipping...</i><br /><br /><hr /><br />";
   }  
 }
 
