@@ -13,7 +13,7 @@
  * 
  */
 
-// Check if settings are less than 24h old or exist
+// Check if the settings file exists and is up to date
 $settings_check = false;
 if (!file_exists($log_settings)) {
   $settings_check = true;
@@ -21,7 +21,7 @@ if (!file_exists($log_settings)) {
   $settings_check = true;
 }
 
-// Do we really need to check?
+// Create a new settings file
 if ($settings_check) {
   
 // Determine minNotional, baseAsset, quoteAsset, etc..

@@ -119,7 +119,7 @@ echo "<h2>Goldstar Bot</h2>";
 if ($debug) {echo "<font color=\"red\"><b>DEBUG MODE ACTIVE</b></font><br /><br />";}
 
 /** Get price of pair **/
-$price = $api->price($pair);
+$price = (float)$api->price($pair);
 
 /** Check if we have enough to pay fees and get important variables **/
 include "checkbase.php";
@@ -127,7 +127,7 @@ include "checkbase.php";
 /** Get all important variables **/
 $set_coin = minimumQuote();
 
-// Report
+/** Report **/
 echo "Date       : " . date("Y-m-d H:i:s") . "<br />";
 echo "Bot ID     : " . $id . "<br />";
 echo "Pair       : " . $pair . "<br />";
@@ -135,12 +135,8 @@ echo "Spread     : " . $spread . "%<br />";
 echo "Markup     : " . $markup . "%<br />";
 echo "Multiplier : " . $multiplier . "x<br />";
 echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
-if (isset($set_coin['multiplierTV'])) {
-  echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";
-}
-if ($tv_advice) {
-  echo "TradingView: " . str_replace("_", " ", implode(", ", $tv_recommend)) . " (" . $tv_period . ")<br />";
-}
+if (isset($set_coin['multiplierTV'])) {echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";}
+if ($tv_advice) {echo "TradingView: " . str_replace("_", " ", implode(", ", $tv_recommend)) . " (" . implode(", ", $tv_periods) . ")<br />";}
 echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Command    : " . $action;
@@ -198,10 +194,10 @@ if ($action == "BUY") {
 
   // Check for TradingView advice
   if (($tv_advice) && (!$nobuy)) {
-    $tv_advice_given = getTradingView($pair, $tv_period);
-    if (!in_array($tv_advice_given, $tv_recommend)) {
+    $tv_advice_given = evalTradingView($pair, $tv_periods, $tv_recommend);
+    if (!$tv_advice_given) {
       $nobuy = true;
-      echo "<i>Not recommended by TradingView (". str_replace("_", " ", $tv_advice_given) . "), skipping...</i><br /><br /><hr /><br />";      
+      echo "<i>Skipping buy because not recommended by TradingView...</i><br /><br /><hr /><br />";      
     }
   }
    

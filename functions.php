@@ -93,7 +93,6 @@ function extractBinance($order) {
     'commission' => $commission
   ]; 
   
-  if ($debug) {echo "<br /><br />"; print_r($transaction); echo "<br /><br />";}
   return $transaction;
 }
 
@@ -108,7 +107,7 @@ function minimumQuote() {
   if (file_exists($log_settings)) {
     $settings = explode(",", file_get_contents($log_settings));    
   } else {
-    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: No settings file was created automatically!";
+    $message = date("Y-m-d H:i:s") . ",Error: No settings file was created automatically!";
     echo $message;
     logCommand($message, "error");
     exit();
@@ -140,7 +139,7 @@ function minimumQuote() {
   // Calculate total Binance balance and compouding in BUSD (only necessary when compounding)
   if (!empty($compounding)) {
     $TbalanceBTC = $api->btc_total;
-    $btc_price   = $api->price("BTCBUSD");
+    $btc_price   = floatval($api->price("BTCBUSD"));
     $TbalanceBUSD = $TbalanceBTC * $btc_price;  
     if ($set_coin['quoteAsset'] <> 'BUSD') {
       $comp_pair = $set_coin['baseAsset'] . 'BUSD';
@@ -210,6 +209,7 @@ function minimumQuote() {
   $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
 
   // Report
+  $debug = false;
   if ($debug) {
   echo "<b>Minimum order</b><br />";
     echo "Price in BUSD  : " . $set_coin['priceBUSD'] . "<br />";
@@ -305,6 +305,28 @@ function getTradingView($symbol, $period) {
   }
 
   return $recommendation;
+}
+
+/** Evaluate TradingView recommendation for array of periods **/
+function evalTradingView($symbol, $periods, $tv_recommend) {
+
+  // Get recommendations for periods
+    foreach ($periods as $period) {
+    $recommendation    = getTradingView($symbol, $period);
+    $recommendations[] = $recommendation;
+    //echo "<i>TradingView recommendation for " . $period . " period: " . $recommendation . "</i><br />";
+    
+  }
+
+  // Determine total recommendation
+  $evalTV = true;
+  foreach ($recommendations as $recommendation) {
+    if (!in_array($recommendation, $tv_recommend)) {
+      $evalTV = false;
+    }
+  }
+
+  return $evalTV;
 }
 
 ?>

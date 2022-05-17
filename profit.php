@@ -140,7 +140,7 @@ $base_coin      = $settings[2];
 $quote_coin     = $settings[3];
 
 // Get price of pair
-$price         = $api->price($pair);
+$price         = floatval($api->price($pair));
 
 // Calculate balances and revenue
 $date               = date("Y-m-d H:i:s");

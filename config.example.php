@@ -12,12 +12,13 @@
  * $spread         - Minimum spread between historical BUY orders
  *                   Setting $spread to zero disables this function
  *                   Can be overriden by URL
- * $multiplier		 - Multiplies the order value by this amount
+ * $multiplier     - Multiplies the order value by this amount
  * $compounding    - Start amount of Binance account in base currency,
-										 0 disables this function (adviced).
- * $bnb						 - Amount of BNB to purchase for paying Binance fees
+ * 					 0 disables this function (adviced).
+ * $bnb			   - Amount of BNB to purchase for paying Binance fees
  * $tv_advice      - Use TradingView recommendation
- * $tv_period      - Period for TradingView recommendation
+ * $tv_periods     - Periods for TradingView recommendation
+ * 					 1m: 1, 5m: 5, 15m: 15, 30m: 30, 1h: 60, 2h: 120, 4h: 240, 1W: 1W, 1M: 1M, 1d: leave emtpy (default)
  * $tv_recommend   - Recommendation to follow of TradingView
  * $binance_key    - Binance API key
  * $binance_secret - Binance API secret
@@ -36,7 +37,7 @@ $bnb            = 0.10;
 
 // TradingView
 $tv_advice      = false;
-$tv_period      = 60;
+$tv_periods     = array(15, 60);
 $tv_recommend   = array("BUY", "STRONG_BUY");
 
 // Binance keys
