@@ -2,12 +2,12 @@
 
 /**
  * @author Ebo Eppenga
- * @copyright 2021
+ * @copyright 2022
  *
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * log_combine.php?files=history|trades
+ * log_combine.php?files=history|trades|errors|profits
  * Combines all the data/*_log_history|trades|errors.csv files 
  * If left empty defaults to *_log_history.csv files
  * 
@@ -26,10 +26,8 @@ if (isset($_GET["files"])) {
     $logfiles = "log_trades.csv";
   } elseif ($_GET["files"] == "errors") {
     $logfiles = "log_errors.csv";
-  } elseif ($_GET["files"] == "fees") {
-    $logfiles = "log_fees.csv";
   } elseif ($_GET["files"] == "profits") {
-    $logfiles = "log_profit.csv";
+    $logfiles = "log_profits.csv";
   } else {
     echo "Error: Undefined what combined log to create!";
     exit();

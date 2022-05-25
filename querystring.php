@@ -2,13 +2,12 @@
 
 /**
  * @author Ebo Eppenga
- * @copyright 2021
+ * @copyright 2022
  *
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * querystring.php
- * Check all query string parameters.
+ * Checks all query string parameters.
  * 
  */
 
@@ -23,20 +22,6 @@ if (!empty($url_key)) {
     exit();
   }
 }
-
-// Get ordertype
-$tradetype = strtoupper($_GET["trade"]);
-if (empty($tradetype)) {
-  $tradetype = "PAPER";
-} elseif (($tradetype <> "LIVE") &&
-          ($tradetype <> "PAPER")) {
-  $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Trading type incorrect";
-  echo $message;
-  logCommand($message, "error");
-  exit();            
-}
-if ($tradetype == "PAPER") {$paper = true;} else {$paper = false;}
-if ($paper) {$tradetype = "PAPER";} else {$tradetype = "LIVE";}
 
 // Get BUY or SELL
 $command = strtoupper($_GET["action"]);
@@ -65,16 +50,10 @@ if (isset($_GET["limit"])) {
   $limit = strtoupper($_GET["limit"]);
   if ($limit == "TRUE") {
     $limit = true;
-    if ($tradetype <> "LIVE") {
-      $message = date("Y-m-d H:i:s") . "," . $id . ",Error: LIMIT order can only work with LIVE trading";      
-      echo $message;
-      logCommand($message, "error");
-      exit();
-    }
   } else {
     $limit = false;
   }
-}
+}  
 
 // Override spread
 if (isset($_GET["spread"])) {

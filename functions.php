@@ -2,12 +2,11 @@
 
 /**
  * @author Ebo Eppenga
- * @copyright 2021
+ * @copyright 2022
  *
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * functions.php
  * All functions required for GoldStar to run properly.
  * 
  */
@@ -17,7 +16,7 @@
 function logCommand($logcommand, $type) {
   
   // Declare some variables as global
-  global $log_trades, $log_history, $log_fees, $log_runs, $log_errors, $log_binance;
+  global $log_trades, $log_history, $log_runs, $log_errors, $log_binance;
 
   if ($type <> "binance") {
     // Standard log format
@@ -37,9 +36,6 @@ function logCommand($logcommand, $type) {
   } elseif ($type == "history") {
     // Store in historical log
     file_put_contents($log_history, $message, FILE_APPEND | LOCK_EX);    
-  } elseif ($type == "fee") {
-    // Store in historical log
-    file_put_contents($log_fees, $message, FILE_APPEND | LOCK_EX);    
     } elseif ($type == "run") {
     // Store in runtime log
     file_put_contents($log_runs, $message, FILE_APPEND | LOCK_EX);    
@@ -222,7 +218,7 @@ function minimumQuote() {
     echo "<br />";
   }
   
-  // Return enough data
+  // Return data
   $minQuote['symbol']       = $set_coin['symbol'];         // Pair (also known as symbol)
   $minQuote['status']       = $set_coin['status'];         // Binance order status (ie. FILLED)
   $minQuote['baseAsset']    = $set_coin['baseAsset'];      // Quantity in base asset
@@ -292,36 +288,28 @@ function getTradingView($symbol, $period) {
 	
   // Set recommendation
   $recommendation = "ERROR";
-  if (($j >= -1) && ($j < -0.5)) {
-    $recommendation = "STRONG_SELL";
-  } elseif (($j >= -0.5) && ($j < -0.1)) {
-    $recommendation = "SELL";
-  } elseif (($j >= -0.1) && ($j <= 0.1)) {
-    $recommendation = "NEUTRAL";
-  } elseif (($j > 0.1)   && ($j <= 0.5)) {
-    $recommendation = "BUY";
-  } elseif (($j > 0.5)   && ($j <= 1.0)) {
-    $recommendation = "STRONG_BUY";
+  if (($j > -1) && ($j < 1)) {
+    $recommendation = $j;
   }
 
   return $recommendation;
 }
 
 /** Evaluate TradingView recommendation for array of periods **/
-function evalTradingView($symbol, $periods, $tv_recommend) {
+function evalTradingView($symbol, $periods, $tv_recomMin, $tv_recomMax) {
 
   // Get recommendations for periods
-    foreach ($periods as $period) {
+  echo "<i>TradingView recommends";
+  foreach ($periods as $period) {
     $recommendation    = getTradingView($symbol, $period);
     $recommendations[] = $recommendation;
-    //echo "<i>TradingView recommendation for " . $period . " period: " . $recommendation . "</i><br />";
-    
+    echo " " . $period . ":" . $recommendation. ",";
   }
 
   // Determine total recommendation
   $evalTV = true;
   foreach ($recommendations as $recommendation) {
-    if (!in_array($recommendation, $tv_recommend)) {
+    if (($recommendation < $tv_recomMin) || ($recommendation > $tv_recomMax)) {
       $evalTV = false;
     }
   }

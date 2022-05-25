@@ -2,7 +2,7 @@
 
 /**
  * @author Ebo Eppenga
- * @copyright 2021
+ * @copyright 2022
  *
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
@@ -40,24 +40,8 @@ $base_sells  = 0;
 $quote_sells = 0;
 $quote_buys  = 0;
 
-// Filenames
-if (isset($_GET["id"])) {
-  $id             = $_GET["id"];
-  $log_trades     = "data/" . $id . "_log_trades.csv";      // Trades
-  $log_history    = "data/" . $id . "_log_history.csv";     // History
-  $log_fees       = "data/" . $id . "_log_fees.csv";        // Fees
-  $log_profit     = "data/" . $id . "_log_profit.csv";      // Profit
-  $log_runs       = "data/" . $id . "_log_runs.csv";        // Executing log
-  $log_binance    = "data/" . $id . "_log_binance.txt";     // Responses from Binance
-  $log_settings   = "data/" . $id . "_log_settings.csv";    // Binance settings
-  $log_errors     = "data/" . $id . "_log_errors.csv";      // Errors
-} else {
-  $message = date("Y-m-d H:i:s") . ",Error: ID not set\n";
-  echo $message;
-  if (!file_exists("data/")) {mkdir("data/");}
-  file_put_contents("data/log_errors.csv", $message, FILE_APPEND | LOCK_EX);  
-  exit();
-}
+// Check logfiles based on Bot ID
+include "check_logfiles.php";
 
 // Get and validate key
 $get_url_key = $_GET["key"];
@@ -73,7 +57,6 @@ if (!empty($url_key)) {
 // Check if we have enough files to analyze
 $check_analyze = false;
 if (file_exists($log_trades))  {$check_analyze = true;}
-if (file_exists($log_fees))    {$check_analyze = true;}
 if (file_exists($log_history)) {$check_analyze = true;}
 if (!$check_analyze) {
   $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Files missing for analysis";
@@ -236,7 +219,7 @@ if (empty($csvDisplay)) {
 // Format: Date, Bot ID, Pair, Start date, End date, Bags, Balance, Revenue, Fees, Profit
 $message  = $date . "," . $id . "," .  $pair . "," . $date_start . "," . $date_end . "," . $profit . ",";
 $message .= $bags . "," . $base_balance . "," . $price  . "," . $revenue . "," . $fees . "," . $total_profit . "\n";
-file_put_contents($log_profit, $message, FILE_APPEND | LOCK_EX);
+file_put_contents($log_profits, $message, FILE_APPEND | LOCK_EX);
 
 if ($csvDisplay == "FULL") {
   echo $message;

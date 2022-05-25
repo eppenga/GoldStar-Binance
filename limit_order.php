@@ -7,7 +7,7 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * limit.php
+ * limit_order.php
  * Adds a LIMIT order to a BUY order adding fees and markup.
  * 
  */
