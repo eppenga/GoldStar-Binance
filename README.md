@@ -3,8 +3,6 @@ GoldStar Crypto Trading Bot trades based on signals from for example TradeView o
 
 GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
-It is possible to trade both in PAPER and LIVE money. When you first start, please use PAPER money to get a feeling for the bot. When using PAPER the bot calculates the commission setting from the configuration file, when using LIVE money it derives it from Binance. Please be aware that there will always be a diference between PAPER and LIVE money because of slippage and other reasons.
-
 The application relies on PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world! Preferably also using an https connection on your server.
 
 **How to install**
@@ -28,18 +26,18 @@ SELL:
 The normal way to run GoldStar using LIVE trading preferably via an SSL (https) connection:
 
 BUY:
-`https://foo.com/path/goldstar.php?id=a2&action=BUY&pair=MATICBUSD&trade=LIVE&key=12345`
+`https://foo.com/path/goldstar.php?id=a2&action=BUY&pair=MATICBUSD&key=12345`
 
 SELL:
-`https://foo.com/path/goldstar.php?id=a2&action=SELL&pair=MATICBUSD&trade=LIVE&key=12345`
+`https://foo.com/path/goldstar.php?id=a2&action=SELL&pair=MATICBUSD&key=12345`
 
 A more complicated example where you override the spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
 
 BUY:
-`https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&trade=LIVE&key=12345`
+`https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&key=12345`
 
 SELL:
-`https://foo.com/path/goldstar.php?id=a3&action=SELL&pair=MATICBUSD&markup=0.7&trade=LIVE&key=12345`
+`https://foo.com/path/goldstar.php?id=a3&action=SELL&pair=MATICBUSD&markup=0.7&key=12345`
 
 ![Running GoldStar as a signalbot](https://share.cryptowat.ch/charts/c78p54ltqnga5k7ql48g-binance-rosebusd.png)
 
@@ -50,7 +48,7 @@ GoldStar can also be used as a gridbot. In that case it will only execute BUY MA
 If you execute the example below every minute you will deploy a grid bot trading on SYSLIMIT spreading the BUY orders 0.9% between each other and setting the profit margin to 0.9% by using a LIMIT SELL order. Gridbots can only be executed using LIVE trading, not PAPER, because it is currently not possible to deal with LIMIT SELL orders on PAPER.
 
 BUY:
-`http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true&trade=live`
+`http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true`
 
 ![Running GoldStar as a gridbot](https://share.cryptowat.ch/charts/c78p35up6bmlauced66g-binance-onebusd.png)
 
@@ -65,12 +63,11 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 **Querystring parameters**
 
 - id       - id of the bot, multiple instances can be run (required). Please make sure the BUY and SELL URLs share the same id to be able to match the trades.
-- action   - BUY or SELL, for SELL no quantity is required (required)
-- pair     - Crypto pair to be used (required)
-- key      - Add a unique key to URL to prevent unwanted execution (optional)
-- trade    - LIVE or PAPER, defaults to PAPER (optional)
-- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional)
-- markup   - Minimum profit. Defaults to setting in config.php (optional)
+- action   - BUY or SELL, for SELL no quantity is required.
+- pair     - Crypto pair to be used (required).
+- key      - Add a unique key to URL to prevent unwanted execution (optional).
+- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional).
+- markup   - Minimum profit. Defaults to setting in config.php (optional).
 
 **Logfiles and analyses**
 
@@ -78,20 +75,20 @@ All logs reside in the 'data/' folder and are seperated per Bot ID (usually you 
 
 - *bot_id*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
 - *bot_id*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
-- *bot_id*_log_fees.csv     - Log of all acquired BNB for paying fees\* (Date, Bot ID, (Binance) Order ID, Pair, BUY, Quote (BNB), Base)
 - *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
 - *bot_id*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
 - *bot_id*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
 - *bot_id*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
 
-\* Acquired BNB is registered per coin but is used for all trades, coins and pair.
-
 \** Profit includes the commission paid, it is true profit.
 
 You can also combine the log files of all Bot IDs by using the log combiner:
-http://foo.com/path/log_combine.php?files=history|trades|errors displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
+http://foo.com/path/log_combine.php?files=history|trades|errors|profits displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
 
 - log_history.csv     - History of all trades for all coins
 - log_trades.csv      - All active trades for all coins
-- log_fees.csv        - Total of all BNB acquired for paying fees
 - log_errors.csv      - Log of all errors for all coins
+
+For profit analyses you can use:
+`http://domotica.eppenga.com/goldstar/profit.php?id=a1&key=12345`
+This will output a full analyses of the profit for the bot with mentioned id.
