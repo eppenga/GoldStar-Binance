@@ -46,8 +46,8 @@ $tv_recomMax    = 1;
 $tv_periods     = array(15, 60);
 
 // Binance keys (ALWAYS KEEP THESE SECRET!)
-$binance_key    = "jl6G7GamikWKEFCipheQD3Zc9xFQx1WYncC0qfUg5cHrqonywIKzHXrUnLw08a4Y";
-$binance_secret = "ON1YsCEInWhoYOrapJgCK5USUiQgYw5kgWfxdCWK33z24WK3oIw9xJdtE76sD2HH";
+$binance_key    = "";
+$binance_secret = "";
 
 // Security key (add to your webhook URLs to prevent unwanted execution!)
 $url_key        = "9E7oAqJn9tcR5G";
