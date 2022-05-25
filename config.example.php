@@ -36,7 +36,7 @@ $fee            = 0.10;
 $markup         = 0.75;
 $spread         = 0.75;
 $multiplier     = 1.00;
-$compounding    = 1000;
+$compounding    = 0;
 $bnb            = 0.05; 
 
 // TradingView
@@ -46,8 +46,8 @@ $tv_recomMax    = 1;
 $tv_periods     = array(15, 60);
 
 // Binance keys (ALWAYS KEEP THESE SECRET!)
-$binance_key    = "";
-$binance_secret = "";
+$binance_key    = "12345";
+$binance_secret = "12345";
 
 // Security key (add to your webhook URLs to prevent unwanted execution!)
 $url_key        = "9E7oAqJn9tcR5G";
