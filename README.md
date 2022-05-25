@@ -75,12 +75,12 @@ All logs reside in the 'data/' folder and are seperated per Bot ID (usually you 
 
 - *bot_id*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
 - *bot_id*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
-- *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\**, Commission, LIVE / PAPER)
+- *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\*, Commission, LIVE / PAPER)
 - *bot_id*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
 - *bot_id*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
 - *bot_id*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
 
-\** Profit includes the commission paid, it is true profit.
+\* Profit includes the commission paid, it is true profit.
 
 You can also combine the log files of all Bot IDs by using the log combiner:
 http://foo.com/path/log_combine.php?files=history|trades|errors|profits displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
