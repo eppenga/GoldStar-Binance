@@ -15,7 +15,7 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 
 Please make sure the BUY and SELL URL both share the same ID, else the application is unable to match the orders. The parameters markup, spread, trade and key are optional. They take their defaults either from the configuration file or have predefined values. It is recommended to use a key and an https connection! Please find below some real world setups on how to run GoldStar.
 
-Simple example where you only set the required parameters initiating PAPER trades on the pair MATICBUSD, usefull for local testing to get to know the bot:
+Simple example trading the pair MATICBUSD:
 
 BUY:
 `http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD`
@@ -45,7 +45,7 @@ SELL:
 
 GoldStar can also be used as a gridbot. In that case it will only execute BUY MARKET orders on Binance and schedule LIMIT SELL orders with a predefined profit percentage. You will need some external tooling to call GoldStar every so many seconds or minutes. Usually a timeschedule of every minute is more than enough. A normal CURL, or if you would like to monitor the output the command line browser Lynx suffices, please see: https://lynx.invisible-island.net/
 
-If you execute the example below every minute you will deploy a grid bot trading on SYSLIMIT spreading the BUY orders 0.9% between each other and setting the profit margin to 0.9% by using a LIMIT SELL order. Gridbots can only be executed using LIVE trading, not PAPER, because it is currently not possible to deal with LIMIT SELL orders on PAPER.
+If you execute the example below every minute you will deploy a grid bot trading on SYSLIMIT spreading the BUY orders 0.9% between each other and setting the profit margin to 0.9% by using a LIMIT SELL order.
 
 BUY:
 `http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true`
