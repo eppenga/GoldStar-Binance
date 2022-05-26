@@ -7,7 +7,8 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * Checks if all logfiles exist
+ * check_logfiles.php
+ * Checks if all logfiles exist and if not create empty logs.
  * 
  */
 

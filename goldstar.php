@@ -85,10 +85,9 @@ if ($action == "BUY") {
   $nobuy     = false;
   $price_min = $price * (1 - $spread / 100);
   $price_max = $price * (1 + $spread / 100);
-      
+
   $handle = fopen($log_trades, "r");
-  while (($line = fgetcsv($handle)) !== false) {
-    
+  while (($line = fgetcsv($handle)) !== false) {    
     $buy_price = $line[6] / $line[5];
     if (($buy_price >= $price_min) && ($buy_price <= $price_max)) {
       $nobuy = true;
@@ -161,7 +160,6 @@ if ($action == "BUY") {
     
     // Add a limit order
     if ($limit) {include("limit_order.php");}
-
     echo "<hr /><br />";
 
     // Update log files for BUY order

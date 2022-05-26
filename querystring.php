@@ -7,7 +7,8 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * Checks all query string parameters.
+ * querystring.php
+ * Reads and checks all query string parameters.
  * 
  */
 

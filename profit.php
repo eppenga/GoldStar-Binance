@@ -8,14 +8,14 @@
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
  * profit.php
- * Calculate the profits for a bot
+ * Calculate the profits for a bot ID.
  * 
  */
 
+ 
 // Set error reporting and config check
 error_reporting(E_ALL & ~E_NOTICE);
 if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!"; exit();}
-
 
 /** User and system variables **/
 // Define application settings in config.php, below is only for expert use!

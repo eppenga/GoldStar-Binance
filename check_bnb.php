@@ -7,6 +7,7 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
+ * check_bnb.php
  * Checks if there is enough BNB for discount or orders to pay fees
  * 
  */

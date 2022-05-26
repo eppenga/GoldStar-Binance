@@ -7,6 +7,7 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
+ * functions.php
  * All functions required for GoldStar to run properly.
  * 
  */

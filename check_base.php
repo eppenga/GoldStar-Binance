@@ -7,6 +7,7 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
+ * check_base.php
  * Checks if it is required to buy additional base coin to fulfill fees.
  * Only runs every 24 hours, should be more than enough.
  * 
