@@ -35,19 +35,19 @@ if ($settings_check) {
     $filters["quoteAsset"] = $symbols["quoteAsset"];
     $filters["orderTypes"] = implode(",",$symbols["orderTypes"]);
   
-  	foreach($symbols["filters"] as $filter) {
-  		if ($filter["filterType"] == "MIN_NOTIONAL" ) {
-  		  $filters["minNotional"] = $filter["minNotional"];
-  		} else if ( $filter["filterType"] == "PRICE_FILTER" ) {
-  			$filters["minPrice"] = $filter["minPrice"];
-  			$filters["maxPrice"] = $filter["maxPrice"];
-  			$filters["tickSize"] = $filter["tickSize"];          
-			} else if ( $filter["filterType"] == "LOT_SIZE" ) {
-				$filters["minQty"] = $filter["minQty"];
-				$filters["maxQty"] = $filter["maxQty"];
-				$filters["stepSize"] = $filter["stepSize"];
-  		}
-  	}
+    foreach($symbols["filters"] as $filter) {
+      if ($filter["filterType"] == "MIN_NOTIONAL" ) {
+        $filters["minNotional"] = $filter["minNotional"];
+      } else if ( $filter["filterType"] == "PRICE_FILTER" ) {
+        $filters["minPrice"] = $filter["minPrice"];
+        $filters["maxPrice"] = $filter["maxPrice"];
+        $filters["tickSize"] = $filter["tickSize"];          
+      } else if ( $filter["filterType"] == "LOT_SIZE" ) {
+        $filters["minQty"] = $filter["minQty"];
+        $filters["maxQty"] = $filter["maxQty"];
+        $filters["stepSize"] = $filter["stepSize"];
+      }
+    }
     $minimums[$symbols["symbol"]] = $filters;
   }
 
