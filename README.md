@@ -23,15 +23,7 @@ BUY:
 SELL:
 `http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD`
 
-The normal way to run GoldStar using LIVE trading preferably via an SSL (https) connection:
-
-BUY:
-`https://foo.com/path/goldstar.php?id=a2&action=BUY&pair=MATICBUSD&key=12345`
-
-SELL:
-`https://foo.com/path/goldstar.php?id=a2&action=SELL&pair=MATICBUSD&key=12345`
-
-A more complicated example where you override the spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
+Running GoldStar preferably via an SSL (https) connections including manual spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
 
 BUY:
 `https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&key=12345`
@@ -43,7 +35,7 @@ SELL:
 
 **Using GoldStar as a gridbot**
 
-GoldStar can also be used as a gridbot. In that case it will only execute BUY MARKET orders on Binance and schedule LIMIT SELL orders with a predefined profit percentage. You will need some external tooling to call GoldStar every so many seconds or minutes. Usually a timeschedule of every minute is more than enough. A normal CURL, or if you would like to monitor the output the command line browser Lynx suffices, please see: https://lynx.invisible-island.net/
+GoldStar can also be used as a gridbot. In that case it will only execute BUY MARKET orders on Binance and schedule LIMIT SELL orders with a predefined profit percentage. You will need some external tooling to call GoldStar every so many seconds or minutes. Usually a timeschedule of every minute is more than enough, an example batch file `gridbot.bat` is provider for educational purposes. A normal CURL, or if you would like to monitor the output the command line browser Lynx suffices, please see: https://lynx.invisible-island.net/
 
 If you execute the example below every minute you will deploy a grid bot trading on SYSLIMIT spreading the BUY orders 0.9% between each other and setting the profit margin to 0.9% by using a LIMIT SELL order.
 
@@ -83,7 +75,7 @@ All logs reside in the 'data/' folder and are seperated per Bot ID (usually you 
 \* Profit includes the commission paid, it is true profit.
 
 You can also combine the log files of all Bot IDs by using the log combiner:
-http://foo.com/path/log_combine.php?files=history|trades|errors|profits displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
+`http://foo.com/path/log_combine.php?files=history|trades|errors|profits` displays in the browser and creates files below. Displaying directly in the browser allows it to be read directly by Google Sheets for examples and files can be used for other analyses.
 
 - log_history.csv     - History of all trades for all coins
 - log_trades.csv      - All active trades for all coins
