@@ -59,6 +59,10 @@ Additionally you can use TradingView to validate a BUY order, if the order is wi
 
 `http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&spread=0.8&markup=0.8&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.3&tvmax=1.0&tvpers=1,5,10,25`
 
+![Using TradingView verification to prevent BUY orders when price falls](https://cryptowat.ch/snapshot/cbsg5r287pp0qbkpkr70-binance-one-busd)
+
+`https://foo.com/path/goldstar.php?id=a3&action=SELL&pair=MATICBUSD&markup=0.7&key=12345`
+
 **Querystring parameters**
 
 - id       - id of the bot, multiple instances can be run (required). Please make sure the BUY and SELL URLs share the same id to be able to match the trades.
