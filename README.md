@@ -57,11 +57,11 @@ You choose your own signals. Based on that the bot will either BUY or SELL. My p
 
 Additionally you can use TradingView to validate a BUY order, if the order is within the parameters of TradingView the BUY order will take place or else if will be cancelled. This can work efficient if you use GoldStar as a gridbot. You can define the minimum and maximum TradingView recommendation as a number. As reference strong sell (-1 to-0.5), sell (-0.5 to -0.1), neutral (-0.1 to 0.1), buy (0.1 to 0.5) and strong buy (0.5 to 1). You can define as many standard periods to check on as you prefer. TradingView periods are 1m: 1, 5m: 5, 15m: 15, 30m: 30, 1h: 60, 2h: 120, 4h: 240, 1W: 1W, 1M: 1M, 1d: none.
 
-`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&spread=0.8&markup=0.8&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.3&tvmax=1.0&tvpers=1,5,10,25`
+In the example below it uses TradingView verification to prevent BUY orders when the price falls. TradingView recommendation must be between 0.25 and 1.0 and it will check on the timeframes of 1, 15 and 60 minutes.
 
-![Using TradingView verification to prevent BUY orders when price falls](https://cryptowat.ch/snapshot/cbsg5r287pp0qbkpkr70-binance-one-busd)
+`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
 
-`https://foo.com/path/goldstar.php?id=a3&action=SELL&pair=MATICBUSD&markup=0.7&key=12345`
+![Using TradingView verification to prevent BUY orders when price falls](https://share.cryptowat.ch/charts/cbsg5r287pp0qbkpkr70-binance-one-busd.png)
 
 **Querystring parameters**
 
