@@ -53,9 +53,11 @@ Please use the URLs above in TradingView (or any other platform) and set them up
 
 You choose your own signals. Based on that the bot will either BUY or SELL. My personal favorite is "Market Liberator" and I use the Short and Long signals on a one minute timescale. They have an awesome Discord Channel here: https://discord.me/marketliberator
 
-** TradingView **
+**TradingView**
 
 Additionally you can use TradingView to validate a BUY order, if the order is within the parameters of TradingView the BUY order will take place or else if will be cancelled. This can work efficient if you use GoldStar as a gridbot. You can define the minimum and maximum TradingView recommendation as a number. As reference strong sell (-1 to-0.5), sell (-0.5 to -0.1), neutral (-0.1 to 0.1), buy (0.1 to 0.5) and strong buy (0.5 to 1). You can define as many standard periods to check on as you prefer. TradingView periods are 1m: 1, 5m: 5, 15m: 15, 30m: 30, 1h: 60, 2h: 120, 4h: 240, 1W: 1W, 1M: 1M, 1d: none.
+
+`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&spread=0.8&markup=0.8&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.3&tvmax=1.0&tvpers=1,5,10,25`
 
 **Querystring parameters**
 
