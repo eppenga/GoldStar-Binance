@@ -84,10 +84,21 @@ while (($line = fgetcsv($handle)) !== false) {
 }
 fclose($handle);
 
+
+
 // Loop through history file and calculate
+$days7 = 7;
+$days28 = 28;
+$now = time();
+$rtotal_buys7 = 0;
+$rtotal_sells7 = 0;
+$rtotal_buys28 = 0;
+$rtotal_sells28 = 0;
 $counter = 0;
 $handle  = fopen($log_history, "r");
 while (($line = fgetcsv($handle)) !== false) {
+  
+  $rcount = false;
   
   // Determine start date
   if ($counter == 0) {
@@ -96,18 +107,31 @@ while (($line = fgetcsv($handle)) !== false) {
   $counter  = $counter + 1;
   $date_end = $line[0];
   
+  $past = strtotime($line[0]);
+  if (($now - $past) < ($days7 * 24 * 60 * 60)) {
+	$rcount7 = true;
+  }
+  if (($now - $past) < ($days28 * 24 * 60 * 60)) {
+    $rcount28 = true;
+  }
+
+
   // BUYs and SELLs
   if ($line[4] == "BUY") {
     $base_buys   = $base_buys + $line[5];
     $quote_buys  = $quote_buys + $line[6];
     @$buy_fees   = $buy_fees - $line[8];   // Remove @ later when fees are fully integrated!!
     $total_buys  = $total_buys + 1;
+    if ($rcount7) {$rtotal_buys7 = $rtotal_buys7 + 1;}
+    if ($rcount28) {$rtotal_buys28 = $rtotal_buys28 + 1;}
   }
   if ($line[4] == "SELL") {
-    $base_sells  = $base_sells + $line[5];
-    $quote_sells = $quote_sells + $line[6];
-    @$sell_fees  = $sell_fees + $line[8];  // Remove @ later when fees are fully integrated!!
-    $total_sells = $total_sells + 1;
+    $base_sells   = $base_sells + $line[5];
+    $quote_sells  = $quote_sells + $line[6];
+    @$sell_fees   = $sell_fees + $line[8];  // Remove @ later when fees are fully integrated!!
+    $total_sells  = $total_sells + 1;
+    if ($rcount7) {$rtotal_sells7 = $rtotal_sells7 + 1;}
+    if ($rcount28) {$rtotal_sells28 = $rtotal_sells28 + 1;}
   }
 
   // Calculate profits and fees
@@ -115,6 +139,8 @@ while (($line = fgetcsv($handle)) !== false) {
 
 }
 fclose($handle);
+
+
 
 // Find the correct pair
 $settings      = explode(",", file_get_contents($log_settings));
@@ -138,6 +164,7 @@ $net_worth          = $quote_sells + (-1 * $base_revenue * $price);
 $avg_base_order     = $base_buys / $total_buys;
 $revenue            = $net_worth - $quote_buys;
 $total_orders       = $total_buys + $total_sells;
+$break_even         = ($quote_revenue / $base_revenue); 
 
 // Don't use real fees for now! Adjust this later!
 $buy_fees           = $quote_buys * 0.001;
@@ -172,6 +199,7 @@ if (empty($csvDisplay)) {
   echo "First trade  : " . $date_start . "<br />";
   echo "Last trade   : " . $date_end . "<br />";
   echo "Current price: " . $price . " " . $quote_coin . "<br />";
+  echo "Break even   : " . $break_even . " " . $quote_coin . "<br />";
   echo "Average order: " . $avg_base_order . " " . $base_coin . "<br />";
   echo "Trade profit : " . $profit . " " . $quote_coin . "<br /><br />";
   
@@ -180,33 +208,36 @@ if (empty($csvDisplay)) {
   echo "Quote balance: " . $quote_balance . " " . $quote_coin . "<br /><br />";
   
   
-  echo "<b>Net worth</b><br />";
-  /*
+  echo "<b>Trades</b><br />";
+/*  
   echo "Base BUYs    : " . $base_buys . " " . $base_coin . "<br />";
   echo "Base SELLs   : " . $base_sells . " " . $base_coin . "<br />";
   echo "Unfilled     : " . $base_revenue . " " . $base_coin . "<br /><br />";
-  */
+*/  
   
   echo "Quote BUYs   : " . $quote_buys . " " . $quote_coin . "<br />";
   echo "Quote SELLs  : " . $quote_sells . " " . $quote_coin . "<br />";
-  echo "Margin       : " . $quote_revenue . " " . $quote_coin . "<br /><br />";
-  
-  echo "Revenue      : " . $revenue . " " . $quote_coin . "<br />";
-  echo "Net worth    : " . $net_worth . " " . $quote_coin . "<br /><br />";
+  echo "Unfilled     : " . $quote_revenue . " " . $quote_coin . "<br />"; 
+  echo "Net worth    : " . $net_worth . " " . $quote_coin . "<br />";
+  echo "Revenue      : " . $revenue . " " . $quote_coin . "<br /><br />";
   
   echo "<b>Fees</b><br />";
   echo "Fees BUY     : " . $buy_fees . " " . $quote_coin . "<br />";
   echo "Fees SELL    : " . $sell_fees . " " . $quote_coin . "<br />";
   echo "Total        : " . $fees . " " . $quote_coin . "<br /><br />";
-  
+
+  echo "<b>Ratios</b><br />";
+  echo "7 Days       : " . round((100 - (($rtotal_buys7 - $rtotal_sells7) / ($rtotal_buys7 + $rtotal_sells7)) * 100), 2) . "% (" . $rtotal_buys7 . " BUY / " . $rtotal_sells7 . " SELL)<br />";
+  echo "28 Days      : " . round((100 - (($rtotal_buys28 - $rtotal_sells28) / ($rtotal_buys28 + $rtotal_sells28)) * 100), 2) . "% (" . $rtotal_buys28 . " BUY / " . $rtotal_sells28 . " SELL)<br />";
+  echo "All time     : " . round((100 - (($total_buys - $total_sells) / ($total_buys + $total_sells)) * 100), 2) . "% (" . $total_buys . " BUY / " . $total_sells . " SELL)<br /><br />";
+
   echo "<b>Mains</b><br />";
-  echo "Bags         : " . $bags . " Open orders<br />";
-  echo "Trades       : " . $total_orders . " Filled orders<br />";
-  echo "Balance      : " . $quote_balance . " " . $quote_coin . "<br />";
-  echo "Revenue      : " . $revenue . " " . $quote_coin . "<br />";
+  echo "Bags amount  : " . $bags . " Open orders<br />";
+  echo "Bags worth   : " . $quote_balance . " " . $quote_coin . "<br />";
+  echo "Trades       : " . $total_orders . " Trades occurred<br />";
   echo "Fees         : " . $fees . " " . $quote_coin . "<br />";
   echo "Profit       : <b><u>" . $total_profit . " " . $quote_coin . "</u></b><br /><br />";
-  
+
   // End program
   echo "<i>Ending program...</i><br />";
   echo "</pre>

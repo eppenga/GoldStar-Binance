@@ -80,7 +80,7 @@ while (($line = fgetcsv($handle)) !== false) {
       echo "SELL Price : " . $limit_order['price'] . "<br />";
       echo "SELL Total : " . $limit_order['quote'] . "<br />";
       echo "Commission : " . $limit_order['commission'] . "<br />";
-      echo "Profit     : " . $limit_order['profit'] . "<br /><br />";
+      echo "Profit     : " . $limit_order['profit'] . "<br /><br /><hr /><br />";
   
       // Add SELL order to $log_history and $log_runs
       $message = date("Y-m-d H:i:s") . "," . $id . "," . $limit_order['pair'] . ",SELL," . $limit_order['quantity'] . "," . $limit_order['quote'] . "\n";

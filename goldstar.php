@@ -15,10 +15,16 @@
  */
 
 
-/** Do preparations before start **/
-
  // Set error reporting
 error_reporting(E_ALL & ~E_NOTICE);
+
+// Log query string
+$log_qstring = "data/log_string.txt";
+if (!file_exists($log_qstring))   {file_put_contents($log_qstring, "");}
+file_put_contents("data/log_string.txt", date("Y-m-d H:i:s") . $_SERVER['REQUEST_URI'] . "\n", FILE_APPEND | LOCK_EX);
+
+// Debug for Trailing test
+$test_Trail = false;
 
 // Configuration
 if (!file_exists("config.php")) {echo "Error: Configuration file does not exist!"; exit();}
@@ -68,48 +74,65 @@ echo "Markup     : " . $markup . "%<br />";
 echo "Multiplier : " . $multiplier . "x<br />";
 echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
 if (isset($set_coin['multiplierTV'])) {echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";}
-if ($tv_advice) {echo "TradingView: (" . $tv_recomMin . "-" . $tv_recomMax . "), (" . implode(", ", $tv_periods) . ")<br />";}
+if ($tv_advice) {echo "TradingView: (" . $tv_recomMin . "-" . $tv_recomMax . "), (" . implode(",", $tv_periods) . ")<br />";}
+if ($tb_enabled) {echo "Trailing   : " . $tb_distance . "%<br />";}
 echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
+echo "Total BUSD : " . $set_coin['totalBUSD'] . " BUSD<br />";
 echo "Command    : " . $action; if ($limit) {echo " / LIMIT";} echo "<br /><br /><hr /><br />";
 
 
 /*** BUY action ***/
 if ($action == "BUY") {
-  echo "<i>Trying to buy " . $set_coin['minBUY'] . " " . $set_coin['baseAsset'] . " at " . $price ." " . $set_coin['quoteAsset'] . "...</i><br /><br /><hr /><br />";
-
-  // Check if there are sold LIMIT orders
-  if ($limit) {include("limit_filled.php");}
-
-  // Check if price is outside spread
-  $nobuy     = false;
-  $price_min = $price * (1 - $spread / 100);
-  $price_max = $price * (1 + $spread / 100);
-
-  $handle = fopen($log_trades, "r");
-  while (($line = fgetcsv($handle)) !== false) {    
-    $buy_price = $line[6] / $line[5];
-    if (($buy_price >= $price_min) && ($buy_price <= $price_max)) {
+  
+  // Buy cycle
+  if ($orderID == 0) {
+    echo "<i>Trying to buy " . $set_coin['minBUY'] . " " . $set_coin['baseAsset'] . " at " . $price ." " . $set_coin['quoteAsset'] . "...</i><br /><br /><hr /><br />";
+  
+    // Check if there are sold LIMIT orders
+    if ($limit) {include("limit_filled.php");}
+  
+    // Check if price is outside spread
+    $nobuy     = false;
+    $price_min = $price * (1 - $spread / 100);
+    $price_max = $price * (1 + $spread / 100);
+  
+    if (!$test_Trail) {
+      $handle = fopen($log_trades, "r");
+      while (($line = fgetcsv($handle)) !== false) {
+        $buy_price = $line[6] / $line[5];
+        if (($buy_price >= $price_min) && ($buy_price <= $price_max)) {
+          $nobuy = true;
+          echo "<i>Skipping buy because existing trade within " . round((($price / $buy_price) - 1) * 100, 2) . "%...</i><br /><br /><hr /><br />";
+          break;
+        }    
+      }
+      fclose($handle);
+    }
+  
+    // Check for TradingView advice
+    if (!$test_Trail) {
+      if (($tv_advice) && (!$nobuy)) {
+        echo "<i>TradingView says";
+        $tv_eval = evalTradingView($pair, $tv_periods, $tv_recomMin, $tv_recomMax);
+        if (!$tv_eval) {
+          $nobuy = true;
+          echo " skipping...</i><br /><br /><hr /><br />";
+        } else {
+          echo " buying...</i><br /><br /><hr /><br />";
+        }
+      }
+    }
+  
+    // Check for trailing buy active
+    if (file_exists($log_trailing) && (!$nobuy)) {
       $nobuy = true;
-      echo "<i>Skipping buy because existing trade within " . round((($price / $buy_price) - 1) * 100, 2) . "%...</i><br /><br /><hr /><br />";
-      break;
-    }    
-  }
-  fclose($handle);
-
-  // Check for TradingView advice
-  if (($tv_advice) && (!$nobuy)) {
-    $tv_eval = evalTradingView($pair, $tv_periods, $tv_recomMin, $tv_recomMax);
-    if (!$tv_eval) {
-      $nobuy = true;
-      echo " skipping buy...</i><br /><br /><hr /><br />";
-    } else {
-      echo " trying to buy...</i><br /><br /><hr /><br />";
+      echo "<i>Skipping buy because trailing buy is active...</i><br /><br /><hr /><br />";
     }
   }
-   
-  // We can buy if spread = 0 or there is no adjacent order
-  if ((!$nobuy) || ($spread == 0)) {
+
+  // Buy if spread = 0 or no adjacent order or to register to log files after trailing
+  if ((!$nobuy) || ($spread == 0 || $orderID <> 0)) {
 
     // Minimum order
     $quantity   = $set_coin['minBUY'];
@@ -123,52 +146,86 @@ if ($action == "BUY") {
     $total_quantity = $quantity;
    
     // Buy Order
-    echo "<b>BUY Order</b><br />";
+    echo "<b>BUY Order</b><br /><br />";
     
     // Check if we have enough quote balance to buy
     $quantityQuote = $set_coin['balanceQuote'];
-    if ($quantityQuote < (2 * $buy)) {
-    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Insufficient " . $set_coin['quoteAsset'] . " to buy " . $set_coin['baseAsset'];
-      echo "<font color=\"red\"><b>" . $message . "</b></font><br /><br />";
-      logCommand($message, "error");
-      exit();
+    if ($orderID == 0) {
+      if ($quantityQuote < (2 * $buy)) {
+      $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Insufficient " . $set_coin['quoteAsset'] . " to buy " . $set_coin['baseAsset'];
+        echo "<font color=\"red\"><b>" . $message . "</b></font><br /><br />";
+        logCommand($message, "error");
+        exit();
+      }
     }
     
     // BUY BUY BUY!
-    $order = $api->marketBuy($pair, $quantity);
-    logCommand($order, "binance");
- 
-    // Adjust and report Binance information
-    $orderstatus    = extractBinance($order);
-    $unique_id      = $orderstatus['order'];
-    $price          = $orderstatus['price'];
-    $quantity       = $orderstatus['base'];
-    $buy            = $orderstatus['quote'];
-    $commission     = $orderstatus['commission'] * $price;
-    $total_quantity = $quantity;
+    $tb_active = false;
+    if (!$tb_enabled) {
 
-    // Report
-    echo "<b>LIVE BUY Trade</b><br />";
-    echo "Quantity   : " . $quantity . "<br />";
-    echo "BUY Price  : " . $price . "<br />";   
-    echo "BUY Total  : " . $buy . "<br />";
-    echo "Commission : " . $commission . " (" . $fee . "%)<br /><br />";      
-    echo "Symbol     : " . $order['symbol'] . "<br />";
-    echo "Order ID   : " . $order['orderId'] . "<br />";
-    echo "Time       : " . $order['transactTime'] . "<br />";
-    echo "Status     : " . $order['status'] . "<br /><br />";
-    
-    // Add a limit order
-    if ($limit) {include("limit_order.php");}
-    echo "<hr /><br />";
+      // Normal BUY
+      $order = $api->marketBuy($pair, $quantity);
+      logCommand($order, "binance");
+    } else {
 
-    // Update log files for BUY order
-    if (!isset($unique_id)) {$unique_id = uniqid();}
-    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
-    logCommand($message, "buy");
-    $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . ",0," . (-1 * $commission) . "," . $tradetype;
-    logCommand($message, "history");
+      // Trailing BUY, if an Order ID is supplied trailing buy ended and we just register
+      if (($orderID == 0) || ($test_Trail)) {
 
+        // Start trailing
+        $tb_active = true;
+        echo "<i>Initiating trailing buy...</i><br /><br /><hr /><br />";
+        
+        // Create Trailing ID file
+        file_put_contents("data/log_trailing.csv", $id);
+
+        // Create Trailing settings file
+        $link    = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $link    = parse_url($link, PHP_URL_SCHEME) . "://" . parse_url($link, PHP_URL_HOST) . dirname(parse_url($link, PHP_URL_PATH)) . "/";
+        $message = $id . "," . $pair . "," . $quantity . "," . $set_coin['tickSize'] . "," . $link;
+        file_put_contents($log_trailing, $message);
+        pclose(popen("start php trailing.php", "r"));
+      } else {
+
+        // Get order status after trailing BUY 
+        $order = $api->orderStatus($pair, $orderID);
+        logCommand($order, "binance");
+      }
+    }
+
+    // Skip if going to trailing buy
+    if (!$tb_active) {
+
+      // Adjust and report Binance information
+      $orderstatus    = extractBinance($order);
+      $unique_id      = $orderstatus['order'];
+      $price          = $orderstatus['price'];
+      $quantity       = $orderstatus['base'];
+      $buy            = $orderstatus['quote'];
+      $commission     = $orderstatus['commission'] * $price;
+      $total_quantity = $quantity;
+
+      // Report
+      echo "<b>LIVE BUY Trade</b><br />";
+      echo "Quantity   : " . $quantity . "<br />";
+      echo "BUY Price  : " . $price . "<br />";   
+      echo "BUY Value  : " . $buy . "<br />";
+      echo "Commission : " . $commission . " (" . $fee . "%)<br /><br />";      
+      echo "Symbol     : " . $order['symbol'] . "<br />";
+      echo "Order ID   : " . $order['orderId'] . "<br />";
+      echo "Time       : " . $order['time'] . "<br />";
+      echo "Status     : " . $order['status'] . "<br /><br />";
+      
+      // Add a limit order
+      if ($limit) {include("limit_order.php");}
+      echo "<hr /><br />";
+
+      // Update log files for BUY order
+      if (!isset($unique_id)) {$unique_id = uniqid();}
+      $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy;
+      logCommand($message, "buy");
+      $message = date("Y-m-d H:i:s") . "," . $id . "," . $unique_id . "," . $pair . ",BUY," . $quantity . "," . $buy . ",0," . (-1 * $commission) . "," . $tradetype;
+      logCommand($message, "history");
+    }
   }  
 }
 
@@ -188,13 +245,13 @@ if ($action == "SELL") {
       // Count and calculate BUY and SELL
       $counter    = $counter + 1;                                // General counter
       $quantity   = $line[5];                                    // Total BUY quantity
-      $buy        = $line[6];                                    // Total BUY funds (quantity * price)
+      $buy        = $line[6];                                    // Total BUY value (quantity * price)
       $buy_price  = $buy / $quantity;                            // Buy price
       $buy_fee    = $buy * ($fee / 100);                         // Buy fee
       $sell_fee   = ($quantity * $price) * ($fee / 100);         // Sell fee
       $fees       = $buy_fee + $sell_fee;                        // Total fees(BUY plus SELL fees)
       $markups    = ($quantity * $price) * ($markup / 100);      // Total markup based on total BUY funds 
-      $sell       = ($quantity * $price);                        // Total SELL
+      $sell       = ($quantity * $price);                        // Total SELL value
       $sell_price = $sell / $quantity;                           // Sell price
       $profit     = $sell - $buy - $fees;                        // Profit
 
@@ -203,7 +260,7 @@ if ($action == "SELL") {
       echo "<i>BUY</i>" . "<br />";
       echo "Quantity   : " . $quantity . "<br />";
       echo "BUY Price  : " . $buy_price . "<br />";
-      echo "BUY Total  : " . $buy . "<br />";
+      echo "BUY Value  : " . $buy . "<br />";
       echo "Commission : " . $buy_fee . "<br /><br />";
 
       // We can SELL with profit!!
@@ -234,14 +291,14 @@ if ($action == "SELL") {
         echo "<b>LIVE SELL Trade</b><br />";
         echo "Quantity   : " . $quantity . "<br />";
         echo "SELL Price : " . $price . "<br />";
-        echo "SELL Total : " . $sell . "<br />";
+        echo "SELL Value : " . $sell . "<br />";
         echo "Markup     : " . $markups . " (" . $markup . "%)<br />";
         echo "Commission : " . $commission . " (" . $fee . "%)<br />";        
         echo "Profit     : " . $profit . "<br /><br />";
                   
         echo "Symbol     : " . $order['symbol'] . "<br />";
         echo "Order ID   : " . $order['orderId'] . "<br />";
-        echo "Time       : " . $order['transactTime'] . "<br />";
+        echo "Time       : " . $order['time'] . "<br />";
         echo "Status     : " . $order['status'] . "<br /><br />";          
 
         // Log to history

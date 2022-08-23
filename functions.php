@@ -89,7 +89,7 @@ function extractBinance($order) {
     'quote'      => $quote,
     'commission' => $commission
   ]; 
-  
+
   return $transaction;
 }
 
@@ -137,7 +137,9 @@ function minimumQuote() {
   if (!empty($compounding)) {
     $TbalanceBTC = $api->btc_total;
     $btc_price   = floatval($api->price("BTCBUSD"));
-    $TbalanceBUSD = $TbalanceBTC * $btc_price;  
+    $TbalanceBUSD = $TbalanceBTC * $btc_price;
+    $set_coin['totalBUSD'] = $TbalanceBUSD;
+    $set_coin['totalBTC']  = $TbalanceBTC;
     if ($set_coin['quoteAsset'] <> 'BUSD') {
       $comp_pair = $set_coin['baseAsset'] . 'BUSD';
       $comp_BUSD = $api->price($comp_pair);
@@ -239,6 +241,8 @@ function minimumQuote() {
   $minQuote['compFactor']   = $set_coin['compFactor'];     // Compounding factor
   $minQuote['multiplier']   = $set_coin['multiplier'];     // Order value multiplier
   $minQuote['multiplierTV'] = $set_coin['multiplierTV'];   // Order value multiplier for TradingView integration
+  $minQuote['totalBUSD']    = $set_coin['totalBUSD'];      // Total in BUSD
+  $minQuote['totalBTC']     = $set_coin['totalBTC'];       // Total in BTC
   
   return $minQuote;  
 }
@@ -297,14 +301,14 @@ function getTradingView($symbol, $period) {
 }
 
 /** Evaluate TradingView recommendation for array of periods **/
+// STRONG_SELL: -1...-0.5, SELL: -0.5...-0.1, NEUTRAL: -0.1...0.1, BUY: 0.1...0.5, STRONG_BUY: 0.5...1
 function evalTradingView($symbol, $periods, $tv_recomMin, $tv_recomMax) {
 
   // Get recommendations for periods
-  echo "<i>TradingView recommends";
   foreach ($periods as $period) {
     $recommendation    = getTradingView($symbol, $period);
     $recommendations[] = $recommendation;
-    echo " " . $period . ":" . $recommendation. ",";
+    echo " " . $period . ":" . round($recommendation, 2). ",";
   }
 
   // Determine total recommendation

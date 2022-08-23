@@ -29,7 +29,7 @@ echo "Markup     : " . $markups . "<br />";
 echo "BUY Fee    : " . $buy_fee . " (" . $fee . "%)<br />";
 echo "SELL Fee   : " . $sell_fee . " (" . $fee . "%)<br />";
 echo "SELL Price : " . $sell_price . "<br />";
-echo "SELL Total : " . $sell . "<br /><br />";        
+echo "SELL Value : " . $sell . "<br /><br />";        
 
 // Place the Limit order
 $order = $api->sell($pair, $quantity, $sell_price);

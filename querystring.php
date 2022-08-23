@@ -15,8 +15,9 @@
 
 // Get and validate key
 $get_url_key = $_GET["key"];
+$get_url_key = str_replace("_", "", $get_url_key);
 if (!empty($url_key)) {
-  if ($get_url_key <> $url_key) {
+  if ($get_url_key <> str_replace("_", "", $url_key)) {
     $message = date("Y-m-d H:i:s") . "," . $id . ",Error: Security key did not validate";
     echo $message;
     logCommand($message, "error");
@@ -99,5 +100,78 @@ if (isset($_GET["mult"])) {
     exit();
   }
 }
+
+// Get Order ID
+if (isset($_GET["orderid"])) {
+  $orderID = $_GET["orderid"];
+} else {
+  $orderID = 0;
+}
+
+// Override TradingView
+if (isset($_GET["tv"])) {
+  $tv_advice = strtoupper($_GET["tv"]);
+  if ($tv_advice == "TRUE") {
+    $tv_advice = true;
+  } else {
+    $tv_advice = false;
+  }
+}
+
+if ($tv_advice) {
+  // Get additional TradingView parameters
+  $tv_recomCheck = false;
+  
+  // Get minimum TradingView recommendation
+  if (isset($_GET["tvmin"])) {
+    $tv_recomMin = $_GET["tvmin"];
+    if (($tv_recomMin < 0) && ($tv_recomMin > 1)) {
+      $tv_recomCheck = true;
+    }
+  }
+
+  // Get maximum TradingView recommendation
+  if (isset($_GET["tvmax"])) {
+    $tv_recomMax = $_GET["tvmax"];
+    if (($tv_recomMax < 0) && ($tv_recomMax > 1)) {
+      $tv_recomCheck = true;
+    }
+  }
+
+  // recomMin must be smaller than recomMax
+  if ($tv_recomMin > $tv_recomMax) {
+    $tv_recomCheck = true;
+  }
+  
+  // Check if recomMin / Max are correct
+  if ($tv_recomCheck) {
+    $message = date("Y-m-d H:i:s") . "," . $id . ",Error: recomMin / Max are not set correct";
+    echo $message;
+    logCommand($message, "error");
+  }
+
+  // Get TradingView periods
+  if (isset($_GET['tvpers'])) {
+    $temp_tvp = $_GET['tvpers'];
+    $tv_periods = explode(",",$temp_tvp);
+  }
+} else {
+
+  //TradingView advice not active
+  $tv_recomMin = 0;
+  $tv_recomMax = 0;
+  $tv_periods  = array();
+}
+
+// Debug
+/*
+echo "TV Advice  : ";
+if ($tv_advice) {echo "True<br />";} else {echo "False<br />";}
+echo "TV RecomMin: " . $tv_recomMin . "<br />";
+echo "TV RecomMax: " . $tv_recomMax . "<br />";
+echo "TV Periods : ";
+print_r($tv_periods);
+exit();
+*/
 
 ?>
