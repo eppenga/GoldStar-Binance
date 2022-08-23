@@ -72,7 +72,7 @@ In the example below it uses TradingView verification to prevent BUY orders when
 - spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional).
 - markup   - Minimum profit. Defaults to setting in config.php (optional).
 - limit    - Place a limit (SELL) order on top of every (BUY) order, set to true or false
-- tvadvice - Use TradingView verification on BUY orders, set to true or false
+- tv       - Use TradingView verification on BUY orders, set to true or false
 - tvmin    - Minimum TradingView verification, use a number to reference
 - tvmax    - Maximum TradingView verification, use a number to reference
 - tvpers   - TradingView periods to use as verification
