@@ -59,7 +59,7 @@ Additionally you can use TradingView to validate a BUY order, if the order is wi
 
 In the example below it uses TradingView verification to prevent BUY orders when the price falls. TradingView recommendation must be between 0.25 and 1.0 and it will check on the timeframes of 1, 15 and 60 minutes.
 
-`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
+`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tv=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
 
 ![Using TradingView verification to prevent BUY orders when price falls](https://share.cryptowat.ch/charts/cbsg5r287pp0qbkpkr70-binance-one-busd.png)
 
