@@ -10,7 +10,7 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 1) Install 'PHP Binance API from JaggedSoft', please see: https://github.com/jaggedsoft/php-binance-api
 2) Install 'GoldStar Trading Bot' in the same folder (this application)
 3) Copy config.example.php to config.php and modify
-4) Optionally download Lynx or another commandline browser (please see below)
+4) Optionally download Lynx to use as Gridbot (please see below)
 
 **Using GoldStar as a signalbot**
 
