@@ -103,5 +103,5 @@ You can also combine the log files of all Bot IDs by using the log combiner:
 - log_errors.csv      - Log of all errors for all coins
 
 For profit analyses you can use:
-`http://domotica.eppenga.com/goldstar/profit.php?id=a1&key=12345`
+`http://foo.com/path/profit.php?id=a1&key=12345`
 This will output a full analyses of the profit for the bot with mentioned id.
