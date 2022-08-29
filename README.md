@@ -1,7 +1,7 @@
 # goldstar-crypto-trading-bot
 GoldStar Crypto Trading Bot trades based on signals from for example TradeView or any other platform. BUY and SELL orders are triggered via webhooks. It is possible to run as many bots as you like as long as the 'id' differs per bot. Data is stored in CSV files in the 'data/' folder, containing trades, orders, runtime and other logs for further analysis.
 
-GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
+GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD and can be multiplied with the 'mult' parameter. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
 The application relies on PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world! Preferably also using an https connection on your server.
 
@@ -69,7 +69,8 @@ In the example below it uses TradingView verification to prevent BUY orders when
 - action   - BUY or SELL, for SELL no quantity is required.
 - pair     - Crypto pair to be used (required).
 - key      - Add a unique key to URL to prevent unwanted execution (optional).
-- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional).
+- mult     - Multiply the minimum order value by this amount (optional).
+- spread   - Minimum spread between historical BUY orders, setting to zero disables. Defaults to the setting in config.php (optional).
 - markup   - Minimum profit. Defaults to setting in config.php (optional).
 - limit    - Place a limit (SELL) order on top of every (BUY) order, set to true or false
 - tv       - Use TradingView verification on BUY orders, set to true or false
@@ -83,7 +84,7 @@ All logs reside in the 'data/' folder and are seperated per Bot ID (usually you 
 
 - *bot_id*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
 - *bot_id*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
-- *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\*, Commission, LIVE / PAPER)
+- *bot_id*_log_history.csv  - History of trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\*, Commission, LIVE / PAPER)
 - *bot_id*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
 - *bot_id*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
 - *bot_id*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
