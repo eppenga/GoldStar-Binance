@@ -21,10 +21,14 @@ Simple example trading the pair MATICBUSD:
 BUY:
 `http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD`
 
+The minimum order value of MATIC is bought, approximately worth 10 BUSD due to Binance regulations.
+
 SELL:
 `http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD`
 
-Running GoldStar preferably via an SSL (https) connections including manual spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
+All MATIC that can be sold at a profit will be sold. This will check all open orders.
+
+Another example running GoldStar preferably via an SSL (https) connections including manual spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file. This shows you can override those parameters through the URL querystring.
 
 BUY:
 `https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&key=12345`
