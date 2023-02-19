@@ -73,12 +73,11 @@ echo "Spread     : " . $spread . "%<br />";
 echo "Markup     : " . $markup . "%<br />";
 echo "Multiplier : " . $multiplier . "x<br />";
 echo "Compounding: " . $set_coin['compFactor'] . "x<br />";
-if (isset($set_coin['multiplierTV'])) {echo "TradingView: " . $set_coin['multiplierTV'] . "x<br />";}
 if ($tv_advice) {echo "TradingView: (" . $tv_recomMin . "-" . $tv_recomMax . "), (" . implode(",", $tv_periods) . ")<br />";}
 if ($tb_enabled) {echo "Trailing   : " . $tb_distance . "%<br />";}
-echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
-echo "Total BUSD : " . $set_coin['totalBUSD'] . " BUSD<br />";
+echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
+if (!empty($compounding)) {echo "Total BUSD : " . $set_coin['totalBUSD'] . " BUSD<br />";}
 echo "Command    : " . $action; if ($limit) {echo " / LIMIT";} echo "<br /><br /><hr /><br />";
 
 

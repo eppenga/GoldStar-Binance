@@ -2,6 +2,7 @@
 /.archive
 /.backup
 /.examples
+/.tests
 
 # Ignore application files
 *.backup

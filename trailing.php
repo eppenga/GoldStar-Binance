@@ -71,9 +71,9 @@ include "functions.php";
 /*** START PROGRAM ***/
 
 // Place initial LIMIT order
-$o_top    = $price *	(1 + ($tb_distance / 100));  														// Top price
-$o_bottom = $price *	(1 - ($tb_distance / 100));  														// Bottom price
-$order    = $api->buy($pair, $quantity, roundStep($o_bottom, $tickSize));		// Place order
+$o_top    						 = $price *	(1 + ($tb_distance / 100));  														// Top price
+$o_bottom 						 = $price *	(1 - ($tb_distance / 100));  														// Bottom price
+$order    						 = $api->buy($pair, $quantity, roundStep($o_bottom, $tickSize));		// Place order
 
 // Get order information
 $orderstatus           = extractBinance($order);
@@ -84,7 +84,6 @@ echo "Placed initial order with ID: " . $unique_id . "\n";
 // Add to log file
 $message = date("Y-m-d H:i:s") . "," . $botid . ",start," . $price . "," . $orderstatus['price'] . "\n";
 file_put_contents("data/log_trails.csv", $message, FILE_APPEND | LOCK_EX);
-
 
 // Prepare for realtime
 $predef['pair']        = $pair;

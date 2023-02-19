@@ -110,6 +110,7 @@ function minimumQuote() {
     exit();
   }
   
+  // Assign settings
   $set_coin['symbol']      = $settings[0];
   $set_coin['status']      = $settings[1];
   $set_coin['baseAsset']   = $settings[2];
@@ -123,6 +124,7 @@ function minimumQuote() {
   $balances     = $api->balances($ticker);
   $balance      = $balances[$set_coin['baseAsset']]['available'];
   $balanceQuote = $balances[$set_coin['quoteAsset']]['available'];
+  // Assign balances
   $set_coin['balance']      = $balance;
   $set_coin['balanceQuote'] = $balanceQuote;
   $set_coin['onOrder']      = $balances[$set_coin['baseAsset']]['onOrder'];
@@ -175,35 +177,6 @@ function minimumQuote() {
   $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplier;
   $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplier;
   
-  // Correct for number of bots (TradingView integration)
-  $multiplierTV    = 0;
-  $log_tradingview = "data/log_tradingview.csv";
-  if (file_exists($log_tradingview)) {
-    
-    // Find last line in file
-    $handle = fopen($log_tradingview, "r");
-    while (($line = fgetcsv($handle)) !== false) {
-      
-      $bots_requested = $line[1];
-      $bots_received  = $line[2];
-    }
-    fclose($handle);
-    
-    // Cap to a maximum of 250%
-    if (($bots_requested / $bots_received) > 2.5) {
-      $multiplierTV = 2.5;
-    } elseif (($bots_requested / $bots_received) < 1) {
-      $multiplierTV = 1;     
-    } else {
-      $multiplierTV = $bots_requested / $bots_received;
-    }
-    $set_coin['multiplierTV'] = $multiplierTV;
-  
-    // Adjust minimum order value
-    $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplierTV;
-    $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplierTV;
-  }
-
   // Fix Binance stepSize precission error
   $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
 
@@ -240,7 +213,6 @@ function minimumQuote() {
   $minQuote['priceBNB']     = $set_coin['priceBNB'];       // Current price of BNB for paying fees 
   $minQuote['compFactor']   = $set_coin['compFactor'];     // Compounding factor
   $minQuote['multiplier']   = $set_coin['multiplier'];     // Order value multiplier
-  $minQuote['multiplierTV'] = $set_coin['multiplierTV'];   // Order value multiplier for TradingView integration
   $minQuote['totalBUSD']    = $set_coin['totalBUSD'];      // Total in BUSD
   $minQuote['totalBTC']     = $set_coin['totalBTC'];       // Total in BTC
   
