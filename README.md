@@ -1,7 +1,7 @@
 # goldstar-crypto-trading-bot
-GoldStar Crypto Trading Bot trades based on signals from for example TradeView or any other platform. BUY and SELL orders are triggered via webhooks. It is possible to run as many bots as you like as long as the 'id' differs per bot. Data is stored in CSV files in the 'data/' folder, containing trades, orders, runtime and other logs for further analysis.
+**GoldStar Crypto Trading Bot trades based on signals from for example TradeView or any other platform. BUY and SELL orders are triggered via webhooks. It is possible to run as many bots as you like as long as the 'id' differs per bot. Data is stored in CSV files in the 'data/' folder, containing trades, orders, runtime and other logs for further analysis.**
 
-GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
+GoldStar automatically determines the smallest possible order value and uses that as BUY orders. This amount is based on Binance minimum order value which is currently 10 BUSD and can be multiplied with the 'mult' parameter. Also it will automatically acquire a small amount of the base currency to pay for the Binance fees. By default GoldStar is setup so it can't sell at a loss (unless you set profit to negative levels or due to any other unforeseen circumstance).
 
 The application relies on PHP Binance API from JaggedSoft to place the actual orders. You need to install that application first and put the GoldStar files in the same folder. Please remember to set a key to prevent others from calling your BUY and SELL URLs because they are exposed to the outside world! Preferably also using an https connection on your server.
 
@@ -10,7 +10,7 @@ The application relies on PHP Binance API from JaggedSoft to place the actual or
 1) Install 'PHP Binance API from JaggedSoft', please see: https://github.com/jaggedsoft/php-binance-api
 2) Install 'GoldStar Trading Bot' in the same folder (this application)
 3) Copy config.example.php to config.php and modify
-4) Optionally download Lynx or another commandline browser (please see below)
+4) Optionally download Lynx to use as Gridbot (please see below)
 
 **Using GoldStar as a signalbot**
 
@@ -21,10 +21,14 @@ Simple example trading the pair MATICBUSD:
 BUY:
 `http://foo.com/path/goldstar.php?id=a1&action=BUY&pair=MATICBUSD`
 
+The minimum order value of MATIC is bought, approximately worth 10 BUSD due to Binance regulations.
+
 SELL:
 `http://foo.com/path/goldstar.php?id=a1&action=SELL&pair=MATICBUSD`
 
-Running GoldStar preferably via an SSL (https) connections including manual spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file:
+All MATIC that can be sold at a profit will be sold. This will check all open orders.
+
+Another example running GoldStar preferably via an SSL (https) connections including manual spread and markup (profit) parameters. In a normal situation you would define the spread and markup in the configuration file. This shows you can override those parameters through the URL querystring.
 
 BUY:
 `https://foo.com/path/goldstar.php?id=a3&action=BUY&pair=MATICBUSD&spread=0.5&key=12345`
@@ -59,7 +63,7 @@ Additionally you can use TradingView to validate a BUY order, if the order is wi
 
 In the example below it uses TradingView verification to prevent BUY orders when the price falls. TradingView recommendation must be between 0.25 and 1.0 and it will check on the timeframes of 1, 15 and 60 minutes.
 
-`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tvadvice=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
+`http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tv=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
 
 ![Using TradingView verification to prevent BUY orders when price falls](https://share.cryptowat.ch/charts/cbsg5r287pp0qbkpkr70-binance-one-busd.png)
 
@@ -69,7 +73,8 @@ In the example below it uses TradingView verification to prevent BUY orders when
 - action   - BUY or SELL, for SELL no quantity is required.
 - pair     - Crypto pair to be used (required).
 - key      - Add a unique key to URL to prevent unwanted execution (optional).
-- spread   - Minimum spread between historical BUY orders, setting $spread to zero disables this function. Defaults to the setting in config.php (optional).
+- mult     - Multiply the minimum order value by this amount (optional).
+- spread   - Minimum spread between historical BUY orders, setting to zero disables. Defaults to the setting in config.php (optional).
 - markup   - Minimum profit. Defaults to setting in config.php (optional).
 - limit    - Place a limit (SELL) order on top of every (BUY) order, set to true or false
 - tv       - Use TradingView verification on BUY orders, set to true or false
@@ -83,7 +88,7 @@ All logs reside in the 'data/' folder and are seperated per Bot ID (usually you 
 
 - *bot_id*_log_binance.txt  - Log of all Binance responses (verbose logging without structure)
 - *bot_id*_log_errors.csv   - Log of all errors (Date, Bot ID, Error message)
-- *bot_id*_log_history.csv  - History of all trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\*, Commission, LIVE / PAPER)
+- *bot_id*_log_history.csv  - History of trades (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote, Profit\*, Commission, LIVE / PAPER)
 - *bot_id*_log_runs.csv     - Runtime log of executions (Date, Bot ID, (Binance) Order ID, Pair, BUY / SELL, Base, Quote)
 - *bot_id*_log_settings.csv	- Binance settings (Pair, Binance status, Base asset, Quote asset, minNotional, stepSize, tickSize)
 - *bot_id*_log_trades.csv   - All active trades (also known as bags) (Date, Bot ID, (Binance) Order ID, Pair, BUY, Base, Quote)
@@ -98,5 +103,5 @@ You can also combine the log files of all Bot IDs by using the log combiner:
 - log_errors.csv      - Log of all errors for all coins
 
 For profit analyses you can use:
-`http://domotica.eppenga.com/goldstar/profit.php?id=a1&key=12345`
+`http://foo.com/path/profit.php?id=a1&key=12345`
 This will output a full analyses of the profit for the bot with mentioned id.
