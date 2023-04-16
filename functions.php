@@ -124,58 +124,64 @@ function minimumQuote() {
   $balances     = $api->balances($ticker);
   $balance      = $balances[$set_coin['baseAsset']]['available'];
   $balanceQuote = $balances[$set_coin['quoteAsset']]['available'];
+
   // Assign balances
   $set_coin['balance']      = $balance;
   $set_coin['balanceQuote'] = $balanceQuote;
   $set_coin['onOrder']      = $balances[$set_coin['baseAsset']]['onOrder'];
 
   // Get balance and price of BNB
-  $balanceBNB = $balances['BNB']['available'];
-  $priceBNB   = $api->price("BNB" . $set_coin['quoteAsset']);
-  $set_coin['balanceBNB'] = $balanceBNB;
-  $set_coin['priceBNB']   = $priceBNB;
+  $balanceBNB              = $balances['BNB']['available'];
+  $priceBNB                = $api->price("BNB" . $set_coin['quoteAsset']);
+  $set_coin['balanceBNB']  = $balanceBNB;
+  $set_coin['priceBNB']    = $priceBNB;
 
-  // Calculate total Binance balance and compouding in BUSD (only necessary when compounding)
+  // Calculate total Binance balance and compouding in USDT (only necessary when compounding)
   if (!empty($compounding)) {
-    $TbalanceBTC = $api->btc_total;
-    $btc_price   = floatval($api->price("BTCBUSD"));
-    $TbalanceBUSD = $TbalanceBTC * $btc_price;
-    $set_coin['totalBUSD'] = $TbalanceBUSD;
-    $set_coin['totalBTC']  = $TbalanceBTC;
-    if ($set_coin['quoteAsset'] <> 'BUSD') {
-      $comp_pair = $set_coin['baseAsset'] . 'BUSD';
-      $comp_BUSD = $api->price($comp_pair);
+    
+    // Calculate total current Binance balance in USDT and BTC
+    $btc_price               = floatval($api->price("BTCUSDT"));
+    $total_BTC               = floatval($api->btc_total);
+    $total_USDT              = $total_BTC * $btc_price;
+    $set_coin['totalBTC']    = $total_BTC;
+    $set_coin['totalUSDT']   = $total_USDT;
+    
+    // Calculate total start balance in USDT
+    if ($set_coin['quoteAsset'] <> "USDT") {
+      $comp_pair             = $set_coin['quoteAsset'] . "USDT";
+      $comp_USDT             = floatval($api->price($comp_pair)) * $compounding;
+      $set_coin['startUSDT'] = $comp_USDT;
     } else {
-      $comp_BUSD = $compounding;
-    }    
-  }
-  
-  // Get price of coin in BUSD
-  $pair_BUSD = $set_coin['baseAsset'] . 'BUSD';
-  $set_coin['priceBUSD'] = $api->price($pair_BUSD);
-
-  // Get balance and price of the coin in BUSD
-  $set_coin['balanceBUSD'] = $set_coin['balance'] * $set_coin['priceBUSD'];
-  $set_coin['onOrderBUSD'] = $set_coin['onOrder'] * $set_coin['priceBUSD'];
-  
-  // Check if notional is below the 10 BUSD (+10% to prevent issues) Binance threshold
-  $set_coin['minBUY']     = ($binanceMinimum * 1.1) / $set_coin['priceBUSD'];
-  $set_coin['minBUYBUSD'] = $binanceMinimum * 1.1;  
-
-  // Correct for compounding only when compounding is set and in profit (> 1)
-  $set_coin['compFactor'] = 1;
-  if (!empty($compounding)) {
-    if (($TbalanceBUSD / $comp_BUSD) > 1) {
-      $set_coin['minBUY']     = $set_coin['minBUY'] * ($TbalanceBUSD / $comp_BUSD);
-      $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * ($TbalanceBUSD / $comp_BUSD);
-      $set_coin['compFactor'] = $TbalanceBUSD / $comp_BUSD;
+      $set_coin['startUSDT'] = $compounding;
     }
   }
+
+  // Get price of coin in USDT
+  $pair_USDT               = $set_coin['baseAsset'] . 'USDT';
+  $set_coin['priceUSDT']   = floatval($api->price($pair_USDT));
+
+  // Get balance and price of the coin in USDT
+  $set_coin['balanceUSDT'] = $set_coin['balance'] * $set_coin['priceUSDT'];
+  $set_coin['onOrderUSDT'] = $set_coin['onOrder'] * $set_coin['priceUSDT'];
   
+  // Check if notional is below the 10 USDT (+10% to prevent issues) Binance threshold
+  $set_coin['minBUY']      = ($binanceMinimum * 1.1) / $set_coin['priceUSDT'];
+  $set_coin['minBUYUSDT']  = $binanceMinimum * 1.1; 
+
+  // Correct for compounding only when compounding is set and in profit (> 1)
+  $set_coin['compFactor']     = 1;
+  if (!empty($compounding)) {
+    $set_coin['compFactor']   = $set_coin['totalUSDT'] / $set_coin['startUSDT'];
+    if ($set_coin['compFactor'] > 1) {
+      $set_coin['minBUY']     = $set_coin['minBUY'] * $set_coin['compFactor'];
+      $set_coin['minBUYUSDT'] = $set_coin['minBUYUSDT'] * $set_coin['compFactor'];
+    }
+  }
+
   // Correct for multiplier
   $set_coin['multiplier'] = $multiplier;
   $set_coin['minBUY']     = $set_coin['minBUY'] * $multiplier;
-  $set_coin['minBUYBUSD'] = $set_coin['minBUYBUSD'] * $multiplier;
+  $set_coin['minBUYUSDT'] = $set_coin['minBUYUSDT'] * $multiplier;
   
   // Fix Binance stepSize precission error
   $set_coin['minBUY'] = roundStep($set_coin['minBUY'], $set_coin['stepSize']);
@@ -184,13 +190,15 @@ function minimumQuote() {
   $debug = false;
   if ($debug) {
   echo "<b>Minimum order</b><br />";
-    echo "Price in BUSD  : " . $set_coin['priceBUSD'] . "<br />";
+    echo "Price in USDT  : " . $set_coin['priceUSDT'] . "<br />";
     echo "Balance in Base: " . $set_coin['balance'] . "<br />";
-    echo "Balance in BUSD: " . $set_coin['balanceBUSD'] . "<br />";
-    if (!empty($compounding)) {echo "Compounding    : " . ($TbalanceBUSD / $comp_BUSD) . "<br />";}
+    echo "Balance in USDT: " . $set_coin['balanceUSDT'] . "<br />";
+    echo "Start in USDT  : " . $set_coin['startUSDT'] . "<br />";
+    echo "Now in USDT    : " . $set_coin['totalUSDT'] . "<br />";
+    if (!empty($compounding)) {echo "Compounding    : " . $set_coin['compFactor'] . "<br />";}
     echo "Min BUY in Base: " . $set_coin['minBUY'] . "<br />";
-    echo "Min BUY in BUSD: " . $set_coin['minBUYBUSD'] . "<br />";
-    if (!empty($compounding)) {echo "<i>Compounding multiplies minBUY(BUSD) by factor given.</i><br />";}
+    echo "Min BUY in USDT: " . $set_coin['minBUYUSDT'] . "<br />";
+    if (!empty($compounding)) {echo "<br /><i>Compounding multiplies minBUY(USDT) by factor given.</i><br />";}
     echo "<br />";
   }
   
@@ -202,20 +210,25 @@ function minimumQuote() {
   $minQuote['minNotional']  = $set_coin['minNotional'];    // Minimum order in base asset, however this is overruled by the Binance minimum 10 BUSD value
   $minQuote['stepSize']     = $set_coin['stepSize'];       // Incremental size for base asset
   $minQuote['tickSize']     = $set_coin['tickSize'];       // Incremental size for price asset
+  $minQuote['priceUSDT']    = $set_coin['priceUSDT'];      // Price of base asset in USDT
   $minQuote['balance']      = $set_coin['balance'];        // How much of the base asset is available on Binance
-  $minQuote['balanceBUSD']  = $set_coin['balanceBUSD'];    // The above only then expressed in BUSD
-  $minQuote['balanceQuote'] = $set_coin['balanceQuote'];   // How much of the quote asset is available on Binance  
+  $minQuote['balanceUSDT']  = $set_coin['balanceUSDT'];    // How much of the base asset is available on Binance in USDT
+  $minQuote['balanceQuote'] = $set_coin['balanceQuote'];   // How much of the quote asset is available on Binance
   $minQuote['onOrder']      = $set_coin['onOrder'];        // How much of the base asset is onOrder
-  $minQuote['onOrderBUSD']  = $set_coin['onOrderBUSD'];    // How much of the base asset is onOrder in BUSD  
+  $minQuote['onOrderUSDT']  = $set_coin['onOrderUSDT'];    // How much of the base asset is onOrder in USDT
   $minQuote['minBUY']       = $set_coin['minBUY'];         // Minimum BUY value in base (possibly corrected for compounding!)
-  $minQuote['minBUYBUSD']   = $set_coin['minBUYBUSD'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
+  $minQuote['minBUYUSDT']   = $set_coin['minBUYUSDT'];     // Minimum BUY value in BUSD (possibly corrected for compounding!)
   $minQuote['balanceBNB']   = $set_coin['balanceBNB'];     // Current amount of BNB for paying fees
   $minQuote['priceBNB']     = $set_coin['priceBNB'];       // Current price of BNB for paying fees 
   $minQuote['compFactor']   = $set_coin['compFactor'];     // Compounding factor
   $minQuote['multiplier']   = $set_coin['multiplier'];     // Order value multiplier
-  $minQuote['totalBUSD']    = $set_coin['totalBUSD'];      // Total in BUSD
-  $minQuote['totalBTC']     = $set_coin['totalBTC'];       // Total in BTC
   
+  
+  if ($debug) {
+    print_r($minQuote);
+    exit();
+  }
+
   return $minQuote;  
 }
 

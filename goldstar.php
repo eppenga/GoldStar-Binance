@@ -7,7 +7,7 @@
  * GoldStar Buy and Sell bot based on signals from for example TradeView
  * or any other platform using PHP Binance API from JaggedSoft.
  * 
- * goldstar.php?id=a1&action=SELL&pair=MATICBUSD&key=12345
+ * goldstar.php?id=a1&action=SELL&pair=MATICUSDT&key=12345
  * 
  * For more information please see:
  * https://github.com/eppenga/goldstar-crypto-trading-bot
@@ -77,7 +77,7 @@ if ($tv_advice) {echo "TradingView: (" . $tv_recomMin . "-" . $tv_recomMax . "),
 if ($tb_enabled) {echo "Trailing   : " . $tb_distance . "%<br />";}
 echo "Order value: " . $set_coin['minBUY'] * $price . " " . $set_coin['quoteAsset'] . "<br />";
 echo "Available  : " . $set_coin['balanceQuote'] . " " . $set_coin['quoteAsset'] . "<br />";
-if (!empty($compounding)) {echo "Total BUSD : " . $set_coin['totalBUSD'] . " BUSD<br />";}
+if (!empty($compounding)) {echo "Total value: " . ($compounding * $set_coin['compFactor']) . " " . $set_coin['quoteAsset'] . "<br />";}
 echo "Command    : " . $action; if ($limit) {echo " / LIMIT";} echo "<br /><br /><hr /><br />";
 
 
