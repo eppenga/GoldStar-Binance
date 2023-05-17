@@ -200,7 +200,7 @@ if ($action == "BUY") {
       $price          = $orderstatus['price'];
       $quantity       = $orderstatus['base'];
       $buy            = $orderstatus['quote'];
-      $commission     = $orderstatus['commission'] * $price;
+      $commission     = $orderstatus['commission'];
       $total_quantity = $quantity;
 
       // Report

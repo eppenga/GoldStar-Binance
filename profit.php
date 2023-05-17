@@ -164,14 +164,10 @@ $net_worth          = $quote_sells + (-1 * $base_revenue * $price);
 $avg_base_order     = $base_buys / $total_buys;
 $revenue            = $net_worth - $quote_buys;
 $total_orders       = $total_buys + $total_sells;
-
-// Don't use real fees for now! Adjust this later!
-$buy_fees           = $quote_buys * 0.001;
-$sell_fees          = 0;
 $fees               = $buy_fees + $sell_fees;
 
 // Break even and total profit
-$break_even         = -(($quote_revenue - $fees) / $base_balance); 
+@$break_even         = -(($quote_revenue - $fees) / $base_balance); 
 $total_profit       = $revenue - $fees;
 
 // Calculate profit per day

@@ -57,11 +57,21 @@ function logCommand($logcommand, $type) {
 /** Extract data from Binance order **/
 function extractBinance($order) {
   
+  // Declare some variables as global
+  global $api, $set_coin;
+
   // Calculate commission
+  $counter    = 0;
   $commission = 0;
   if (isset($order['fills'])) {
     foreach ($order['fills'] as $fill) {
-      $commission = $commission + $fill['commission'];
+      if ($counter == 0) {
+        $commasset = $fill['commissionAsset'];
+        $commpair  = $commasset . $set_coin['quoteAsset'];
+        $commprice = (float)$api->price($commpair);
+      }
+      $commission = $commission + $fill['commission'] * $commprice;
+      $counter = $counter + 1;
     }    
   }
   
