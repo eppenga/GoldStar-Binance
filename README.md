@@ -47,7 +47,7 @@ If you execute the example below every minute you will deploy a grid bot trading
 BUY:
 `http://foo.com/path/goldstar.php?id=syslimit&pair=SYSBUSD&spread=0.9&markup=0.9&action=BUY&key=12345&limit=true`
 
-![Running GoldStar as a gridbot](http://domotica.eppenga.com/goldstar/.examples/binance-onebusd-Jan-02-2022-13-51-0.png)
+![Running GoldStar as a gridbot](http://www.eppenga.com/goldstar/binance-onebusd-Jan-02-2022-13-51-0.png)
 
 **Webhooks**
 
@@ -65,7 +65,7 @@ In the example below it uses TradingView verification to prevent BUY orders when
 
 `http://foo.com/path/goldstar.php?id=a4&pair=ONEBUSD&action=BUY&key=12345&limit=true&trade=live&tv=true&tvmin=0.25&tvmax=1.0&tvpers=1,15,60`
 
-![Using TradingView verification to prevent BUY orders when price falls](http://domotica.eppenga.com/goldstar/.examples/tradingview_protection.png)
+![Using TradingView verification to prevent BUY orders when price falls](http://www.eppenga.com/goldstar/tradingview_protection.png)
 
 **Querystring parameters**
 
